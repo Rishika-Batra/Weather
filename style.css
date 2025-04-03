@@ -1,0 +1,147 @@
+@import url("https://fonts.googleapis.com/css2?family=Playwrite+IN:wght@100..400&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+*{
+    margin: 0px;
+    padding: 0px;
+    font-family: "Poopins";
+    box-sizing: border-box;
+}
+::-webkit-scrollbar{
+    width: 5px;
+}
+
+::-webkit-scrollbar-thumb{
+    background: #83838398;
+}
+
+body{
+    height: 100vh;
+}
+.container{
+    display: flex;
+    align-items: center;
+}
+.weather-input{
+    width: 25%;
+    position: fixed;
+    inset: 0;
+    background: #78c1f3;
+    padding: 1rem 2.5rem;
+}
+.weatherIcon{
+    background-position: 50% !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
+    display: block;
+    height: 25%;
+    margin: 2rem auto;
+}
+.input-group{
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 2rem 0;
+}
+.input-group input{
+    background: #f8f8f8;
+    text-transform: capitalize;
+    padding: 1rem;
+    font-size: 15px;
+    border-radius: 6px;
+    width: 100%;
+    outline: none;
+    border: none;
+}
+.input-group .converter{
+    position: absolute;
+    right: 45px;
+    border: none;
+    outline: none;
+    font-size: 18px;
+}
+.input.grouo .fa-search{
+    position: absolute;
+    right: 15px;
+    color: #909090;
+    font-size: 22px;
+}
+.weather-output{
+    width: 75%;
+    position: fixed;
+    inset: 0;
+    margin-left: 30%;
+    padding: 2 rem;
+    background: #f8f8f8;
+    overflow:auto;
+}
+
+.weather-input .feelsLike,
+.weather-input .description,
+.weather-input .date,
+.weather-input .city{
+    padding: 10px 0;
+}
+
+.temperature{
+    font-size: 5rem;
+    text-align: center;
+    display: flex;
+    font-weight: 300;
+}
+
+.temperature span{
+    font-size: 2rem;
+    margin-top: 20px;
+}
+
+.Highlights{
+    display: grid;
+    grid-template-columns: repeat(3,350px);
+    grid-auto-flow: row;
+    row-gap: 1rem;
+    column-gap: 10px;
+}
+
+.Forecast{
+    display: grid;
+    grid-template-columns: repeat(4,260px);
+    grid-auto-flow: row;
+    row-gap: 1rem;
+    column-gap: 10px;
+}
+.Highlights div,
+.Forecast div {
+    height: 200px;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: #78c1f3;
+    border-radius: 20px;
+    padding: 1rem;
+}
+
+.Highlights i{
+    font-size: 45px;
+}
+
+.sun span{
+    align-items: center;
+    display:flex;
+    gap: 10px;
+}
+
+.forecast-desc{
+    color: #7f7f7f;
+    font-size: 0.8rem;
+    text-align: center;
+    padding-bottom: 5px;
+    font-style: italic;
+}
+
+.description i{
+    font-size: 25px;
+}
+
+.heading{
+    margin: 1rem 0 ;
+}
