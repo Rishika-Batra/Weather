@@ -1,7 +1,6 @@
 // --- LIVE ROUTE ACCESS CREDS ---
 const API_KEY = "f400d12c089a4750817180949250304";
-const BASE_URL = `[api.weatherapi.com](https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&days=7&q=)`;
-
+const BASE_URL = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&days=7&q=`;
 // --- DOM ELEMENTS ---
 const searchInput = document.getElementById("search-input");
 const searchBtn = document.getElementById("search-btn");
