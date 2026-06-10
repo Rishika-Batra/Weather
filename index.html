@@ -7,9 +7,8 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <div class="app-container">
-    
+    <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="logo-wrapper">
@@ -20,17 +19,28 @@
       </div>
       
       <div class="search-wrapper">
-        <input type="text" id="search-input" value="Lucknow" placeholder="Search city...">
+        <input
+          type="text"
+          id="search-input"
+          value="Lucknow"
+          placeholder="Search city..."
+          autocomplete="off"
+        >
         <button id="search-btn" class="search-icon">🔍</button>
       </div>
 
+      <p id="status-message" class="status-message"></p>
+
       <div id="sidebar-weather-card" class="weather-card">
         <div class="main-temp-wrapper">
-          <span id="current-temp" class="temp-display">--</span>
-          <span class="unit-toggle">°C</span>
+          <div>
+            <span id="current-temp" class="temp-display">--</span>
+            <span class="unit-toggle">°C</span>
+          </div>
+          <div id="weather-icon-display" class="condition-icon">☁️</div>
         </div>
-        <div id="weather-icon-display" class="condition-icon">☁️</div>
-        <p id="weather-condition" class="condition-text">Loading...</p>
+
+        <p id="weather-condition" class="condition-text">Search a city to begin</p>
         <p class="feels-like">Feels like <span id="feels-like-temp">--°C</span></p>
         
         <hr class="divider">
@@ -43,70 +53,108 @@
         <div class="sun-phases">
           <div class="sun-item">
             <span class="sun-label">☀️ Sunrise</span>
-            <span id="sunrise-time" class="sun-value">--:-- AM</span>
+            <span id="sunrise-time" class="sun-value">--:--</span>
           </div>
           <div class="sun-item">
             <span class="sun-label">🌙 Sunset</span>
-            <span id="sunset-time" class="sun-value">--:-- PM</span>
+            <span id="sunset-time" class="sun-value">--:--</span>
           </div>
         </div>
       </div>
     </aside>
 
+    <!-- MAIN CONTENT -->
     <main class="main-content">
-      
       <header class="dashboard-header">
         <div class="tab-container">
-          <button id="tab-today" class="tab-btn active">Today</button>
-          <button id="tab-week" class="tab-btn">This week</button>
-          <span id="live-badge" class="badge-live">● Live</span>
+          <button id="tab-today" class="tab-btn active" type="button">Today</button>
+          <button id="tab-week" class="tab-btn" type="button">This week</button>
         </div>
       </header>
 
+      <!-- TODAY PANEL -->
       <section id="today-forecast-panel" class="forecast-view-panel">
         <h3 class="section-title">Today's Highlights</h3>
         
         <div class="highlights-grid">
           <div class="metrics-card">
-            <div class="card-header"><span>WIND STATUS</span> <span class="icon">💨</span></div>
-            <div class="metric-value"><span id="wind-speed">--</span> <span class="unit">km/h</span></div>
+            <div class="card-header">
+              <span>WIND STATUS</span>
+              <span class="icon">💨</span>
+            </div>
+            <div class="metric-value">
+              <span id="wind-speed">--</span>
+              <span class="unit">km/h</span>
+            </div>
           </div>
+
           <div class="metrics-card">
-            <div class="card-header"><span>HUMIDITY</span> <span class="icon">💧</span></div>
-            <div class="metric-value"><span id="humidity-value">--</span> <span class="unit">%</span></div>
+            <div class="card-header">
+              <span>HUMIDITY</span>
+              <span class="icon">💧</span>
+            </div>
+            <div class="metric-value">
+              <span id="humidity-value">--</span>
+              <span class="unit">%</span>
+            </div>
             <div class="progress-bar-container">
               <div id="humidity-bar" class="progress-fill" style="width: 0%;"></div>
             </div>
           </div>
+
           <div class="metrics-card">
-            <div class="card-header"><span>UV INDEX</span> <span class="icon">☀️</span></div>
-            <div class="metric-value"><span id="uv-index">--</span></div>
+            <div class="card-header">
+              <span>UV INDEX</span>
+              <span class="icon">☀️</span>
+            </div>
+            <div class="metric-value">
+              <span id="uv-index">--</span>
+            </div>
           </div>
+
           <div class="metrics-card">
-            <div class="card-header"><span>PRESSURE</span> <span class="icon">⏲️</span></div>
-            <div class="metric-value"><span id="pressure-value">--</span> <span class="unit">hPa</span></div>
+            <div class="card-header">
+              <span>PRESSURE</span>
+              <span class="icon">⏲️</span>
+            </div>
+            <div class="metric-value">
+              <span id="pressure-value">--</span>
+              <span class="unit">hPa</span>
+            </div>
           </div>
+
           <div class="metrics-card">
-            <div class="card-header"><span>VISIBILITY</span> <span class="icon">👁️</span></div>
-            <div class="metric-value"><span id="visibility-value">--</span> <span class="unit">km</span></div>
+            <div class="card-header">
+              <span>VISIBILITY</span>
+              <span class="icon">👁️</span>
+            </div>
+            <div class="metric-value">
+              <span id="visibility-value">--</span>
+              <span class="unit">km</span>
+            </div>
           </div>
+
           <div class="metrics-card">
-            <div class="card-header"><span>CLOUD COVER</span> <span class="icon">☁️</span></div>
-            <div class="metric-value"><span id="cloud-value">--</span> <span class="unit">%</span></div>
+            <div class="card-header">
+              <span>CLOUD COVER</span>
+              <span class="icon">☁️</span>
+            </div>
+            <div class="metric-value">
+              <span id="cloud-value">--</span>
+              <span class="unit">%</span>
+            </div>
           </div>
         </div>
 
         <h3 class="section-title margin-top-lg">Hourly Forecast</h3>
-        <div class="horizontal-scroll-container" id="hourly-cards-container">
-          </div>
+        <div class="horizontal-scroll-container" id="hourly-cards-container"></div>
       </section>
 
+      <!-- WEEK PANEL -->
       <section id="weekly-forecast-panel" class="forecast-view-panel hidden">
         <h3 class="section-title">This Week's Forecast</h3>
-        <div class="weekly-list-container" id="weekly-cards-container">
-          </div>
+        <div class="weekly-list-container" id="weekly-cards-container"></div>
       </section>
-
     </main>
   </div>
 
