@@ -1,250 +1,147 @@
-const API_KEY = "f400d12c089a4750817180949250304";
-const BASE_URL = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&days=7&q=`;
+// --- DOM CORE STRUCTURAL SELECTORS ---
+const tabToday = document.getElementById('tab-today');
+const tabWeek = document.getElementById('tab-week');
+const hourlyView = document.getElementById('hourly-forecast-view');
+const weeklyView = document.getElementById('weekly-forecast-view');
+const liveBadge = document.getElementById('live-badge');
+const themeToggle = document.getElementById('theme-toggle');
+const sidebarCard = document.getElementById('sidebar-weather-card');
 
-// State tracking
-let currentWeatherData = null;
-let currentUnit = "C"; // Default context configuration
+const hourlyCardsContainer = document.getElementById('hourly-cards-container');
+const weeklyCardsContainer = document.getElementById('weekly-cards-container');
 
-// Core Elements Map
-const cityInput = document.getElementById("cityInput");
-const searchTrigger = document.getElementById("searchTrigger");
-const searchOverlay = document.getElementById("searchOverlay");
-const searchClose = document.getElementById("searchClose");
+// --- SIMULATED WEATHER RAW MOCK DATA STRUCT ---
+const mockHourlyData = [
+  { time: "13:00", temp: 47, icon: "☁️", pop: 0 },
+  { time: "14:00", temp: 45, icon: "☁️", pop: 0 },
+  { time: "15:00", temp: 45, icon: "☁️", pop: 0 },
+  { time: "16:00", temp: 44, icon: "☁️", pop: 0 },
+  { time: "17:00", temp: 44, icon: "⛈️", pop: 7 },
+  { time: "18:00", temp: 43, icon: "☁️", pop: 0 },
+  { time: "19:00", temp: 41, icon: "☁️", pop: 0 },
+  { time: "20:00", temp: 40, icon: "🌙", pop: 17 },
+  { time: "21:00", temp: 36, icon: "🌙", pop: 17 },
+  { time: "22:00", temp: 39, icon: "🌙", pop: 3 },
+  { time: "23:00", temp: 39, icon: "🌙", pop: 20 }
+];
 
-const temperature = document.getElementById("temperature");
-const conditionText = document.getElementById("conditionText");
-const feelsLike = document.getElementById("feelsLike");
-const cityName = document.getElementById("cityName");
-const localTime = document.getElementById("localTime");
-const sunrise = document.getElementById("sunrise");
-const sunset = document.getElementById("sunset");
-const weatherIconWrap = document.getElementById("weatherIconWrap");
+const mockWeeklyData = [
+  { day: "Wednesday 10 June", tempMax: 47, tempMin: 34, condition: "Patchy rain nearby", icon: "🌦️" },
+  { day: "Thursday 11 June", tempMax: 45, tempMin: 32, condition: "Patchy rain nearby", icon: "🌦️" },
+  { day: "Friday 12 June", tempMax: 43, tempMin: 30, condition: "Sunny skies", icon: "☀️" },
+  { day: "Saturday 13 June", tempMax: 42, tempMin: 29, condition: "Clear Sky", icon: "☀️" },
+  { day: "Sunday 14 June", tempMax: 44, tempMin: 31, condition: "Partly Cloudy", icon: "⛅" }
+];
 
-const windSpeed = document.getElementById("windSpeed");
-const windDir = document.getElementById("windDir");
-const compassNeedle = document.getElementById("compassNeedle");
-const humidity = document.getElementById("humidity");
-const uvIndex = document.getElementById("uvIndex");
-const pressure = document.getElementById("pressure");
-const visibility = document.getElementById("visibility");
-const clouds = document.getElementById("clouds");
-
-const humGauge = document.getElementById("humGauge");
-const humHint = document.getElementById("humHint");
-const cloudGauge = document.getElementById("cloudGauge");
-const uvBar = document.getElementById("uvBar");
-const uvLabel = document.getElementById("uvLabel");
-const visHint = document.getElementById("visHint");
-
-const forecastList = document.getElementById("forecastList");
-const hourlyStrip = document.getElementById("hourlyStrip");
-const loadingScreen = document.getElementById("loadingScreen");
-const toast = document.getElementById("toast");
-
-// Navigation Controller Setup
-const tabs = document.querySelectorAll(".topbar-tabs .tab");
-const panels = document.querySelectorAll(".panel");
-
-tabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    tabs.forEach(t => t.classList.remove("active"));
-    panels.forEach(p => p.classList.remove("active"));
-
-    tab.classList.add("active");
-    const targetPanel = document.getElementById(`panel-${tab.dataset.tab}`);
-    if (targetPanel) targetPanel.classList.add("active");
+// --- 1. TAB RENDERING & TRANSITION LOGIC ---
+function renderHourlyForecast() {
+  hourlyCardsContainer.innerHTML = '';
+  mockHourlyData.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'hour-card';
+    card.innerHTML = `
+      <div style="font-size: 14px; color: var(--text-muted);">${item.time}</div>
+      <div style="font-size: 24px; margin: 4px 0;">${item.icon}</div>
+      <div style="font-weight: 600;">${item.temp}°</div>
+      <div style="font-size: 11px; color: #3b82f6;">${item.pop}%</div>
+    `;
+    hourlyCardsContainer.appendChild(card);
   });
-});
-
-// Metric Conversion Helpers
-function cToF(c) { return Math.round((c * 9) / 5 + 32); }
-
-function getWindDirectionDegrees(dir) {
-  const mapping = { 'N': 0, 'NNE': 22.5, 'NE': 45, 'ENE': 67.5, 'E': 90, 'ESE': 112.5, 'SE': 135, 'SSE': 157.5, 'S': 180, 'SSW': 202.5, 'SW': 225, 'WSW': 247.5, 'W': 270, 'WNW': 292.5, 'NW': 315, 'NNW': 337.5 };
-  return mapping[dir.toUpperCase()] || 0;
 }
 
-function getUVStatus(uv) {
-  if (uv <= 2) return "Low risk";
-  if (uv <= 5) return "Moderate risk";
-  if (uv <= 7) return "High risk";
-  return "Very high risk";
-}
-
-function getHumidityStatus(h) {
-  if (h < 30) return "Dry air";
-  if (h <= 60) return "Comfortable environment";
-  return "Sticky air / High humidity";
-}
-
-function showToast(msg) {
-  toast.textContent = msg;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 3000);
-}
-
-function hideLoader() { loadingScreen.classList.add("hidden"); }
-function showLoader() { loadingScreen.classList.remove("hidden"); }
-
-async function getWeather(city) {
-  try {
-    showLoader();
-    const res = await fetch(BASE_URL + encodeURIComponent(city));
-    const data = await res.json();
-
-    if (data.error) throw new Error(data.error.message);
-
-    currentWeatherData = data;
-    renderWeather();
-    hideLoader();
-    searchOverlay.classList.remove("open");
-  } catch (err) {
-    hideLoader();
-    showToast(err.message);
-    console.error(err);
-  }
-}
-
-function renderWeather() {
-  if (!currentWeatherData) return;
-
-  const current = currentWeatherData.current;
-  const location = currentWeatherData.location;
-  const astro = currentWeatherData.forecast.forecastday[0].astro;
-
-  // Geographic Meta Fields
-  cityName.textContent = `${location.name}, ${location.country}`;
-  localTime.textContent = location.localtime;
-
-  // Main Temperature display calculation
-  if (currentUnit === "C") {
-    temperature.textContent = Math.round(current.temp_c);
-    feelsLike.textContent = `Feels like ${Math.round(current.feelslike_c)}°C`;
-  } else {
-    temperature.textContent = Math.round(current.temp_f);
-    feelsLike.textContent = `Feels like ${Math.round(current.feelslike_f)}°F`;
-  }
-
-  conditionText.textContent = current.condition.text;
-  weatherIconWrap.innerHTML = `<img src="https:${current.condition.icon}" alt="${current.condition.text}">`;
-
-  // Update Highlight metrics
-  windSpeed.textContent = Math.round(current.wind_kph);
-  windDir.textContent = current.wind_dir;
-  compassNeedle.style.transform = `rotate(${getWindDirectionDegrees(current.wind_dir)}deg)`;
-
-  humidity.textContent = current.humidity;
-  humGauge.style.width = `${current.humidity}%`;
-  humHint.textContent = getHumidityStatus(current.humidity);
-
-  pressure.textContent = current.pressure_mb;
-  visibility.textContent = current.vis_km;
-  visHint.textContent = current.vis_km >= 10 ? "Perfect clear view" : "Reduced visibility conditions";
-  
-  clouds.textContent = current.cloud;
-  cloudGauge.style.width = `${current.cloud}%`;
-
-  uvIndex.textContent = current.uv;
-  uvBar.style.left = `${Math.min(current.uv * 10, 100)}%`;
-  uvLabel.textContent = getUVStatus(current.uv);
-
-  // Directly parse native string strings returned cleanly by current API limits
-  sunrise.textContent = astro.sunrise || "--";
-  sunset.textContent = astro.sunset || "--";
-
-  // Sub-renderers
-  renderForecast(currentWeatherData.forecast.forecastday);
-  renderHourly(currentWeatherData.forecast.forecastday[0].hour);
-}
-
-function renderForecast(days) {
-  forecastList.innerHTML = "";
-
-  days.forEach((day, index) => {
-    const date = new Date(day.date);
-    const row = document.createElement("div");
-    row.className = "forecast-row";
-
-    const displayDay = index === 0 ? "Today" : date.toLocaleDateString("en-US", { weekday: "long" });
-    
-    const hiTemp = currentUnit === "C" ? `${Math.round(day.day.maxtemp_c)}°` : `${Math.round(day.day.maxtemp_f)}°`;
-    const loTemp = currentUnit === "C" ? `${Math.round(day.day.mintemp_c)}°` : `${Math.round(day.day.mintemp_f)}°`;
-
+function renderWeeklyForecast() {
+  weeklyCardsContainer.innerHTML = '';
+  mockWeeklyData.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'week-row-card';
     row.innerHTML = `
-      <div class="forecast-day">${displayDay}</div>
-      <img class="forecast-icon" src="https:${day.day.condition.icon}" alt="icon" />
-      <div class="forecast-desc">${day.day.condition.text}</div>
-      <div class="forecast-temps">
-        <span class="temp-hi">${hiTemp}</span>
-        <span class="temp-lo">${loTemp}</span>
+      <div style="font-weight: 500; min-width: 160px;">${item.day}</div>
+      <div style="display: flex; align-items: center; gap: 8px; color: var(--text-muted);">
+        <span style="font-size: 20px;">${item.icon}</span>
+        <span>${item.condition}</span>
+      </div>
+      <div style="font-weight: 600;">
+        <span>${item.tempMax}°C</span> / <span style="color: var(--text-muted); font-weight: 400;">${item.tempMin}°C</span>
       </div>
     `;
-    forecastList.appendChild(row);
+    weeklyCardsContainer.appendChild(row);
   });
 }
 
-function renderHourly(hours) {
-  hourlyStrip.innerHTML = "";
-  const currentHour = new Date().getHours();
-
-  hours.forEach((hour) => {
-    const hourDate = new Date(hour.time);
-    const hourNum = hourDate.getHours();
-
-    // Show only future or current hours for better interface usability dashboard view
-    if (hourNum < currentHour && new Date(currentWeatherData.location.localtime).getDate() === hourDate.getDate()) {
-       return;
-    }
-
-    const card = document.createElement("div");
-    card.className = hourNum === currentHour ? "hourly-card now" : "hourly-card";
-
-    const displayTime = hourNum === 0 ? "12 AM" : hourNum === 12 ? "12 PM" : hourNum > 12 ? `${hourNum - 12} PM` : `${hourNum} AM`;
-    const displayTemp = currentUnit === "C" ? `${Math.round(hour.temp_c)}°` : `${Math.round(hour.temp_f)}°`;
-
-    card.innerHTML = `
-      <div class="hourly-time">${displayTime}</div>
-      <img class="hourly-icon" src="https:${hour.condition.icon}" alt="icon">
-      <div class="hourly-temp">${displayTemp}</div>
-      <div class="hourly-rain">${hour.chance_of_rain || 0}% Rain</div>
-    `;
-    hourlyStrip.appendChild(card);
-  });
-}
-
-// Global Core Unit Toggles listeners
-document.getElementById("btnC").addEventListener("click", (e) => {
-  currentUnit = "C";
-  document.getElementById("btnF").classList.remove("active");
-  e.target.classList.add("active");
-  renderWeather();
-});
-
-document.getElementById("btnF").addEventListener("click", (e) => {
-  currentUnit = "F";
-  document.getElementById("btnC").classList.remove("active");
-  e.target.classList.add("active");
-  renderWeather();
-});
-
-// Structural Window Event mapping actions
-searchTrigger.addEventListener("click", () => {
-  searchOverlay.classList.add("open");
-  cityInput.focus();
-});
-
-searchClose.addEventListener("click", () => {
-  searchOverlay.classList.remove("open");
-});
-
-cityInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    const city = cityInput.value.trim();
-    if (city) getWeather(city);
+function setForecastView(view) {
+  if (view === 'today') {
+    tabToday.classList.add('active');
+    tabWeek.classList.remove('active');
+    hourlyView.classList.remove('hidden');
+    weeklyView.classList.add('hidden');
+    liveBadge.classList.remove('hidden'); 
+  } else {
+    tabWeek.classList.add('active');
+    tabToday.classList.remove('active');
+    weeklyView.classList.remove('hidden');
+    hourlyView.classList.add('hidden');
+    liveBadge.classList.add('hidden'); 
   }
-  if (e.key === "Escape") searchOverlay.classList.remove("open");
+}
+
+tabToday.addEventListener('click', () => setForecastView('today'));
+tabWeek.addEventListener('click', () => setForecastView('week'));
+
+// --- 2. THEME CONTROLLER ENGINE (Light/Dark Switch) ---
+themeToggle.addEventListener('click', () => {
+  const htmlElement = document.documentElement;
+  const themeIcon = themeToggle.querySelector('.theme-icon');
+
+  if (htmlElement.classList.contains('light')) {
+    htmlElement.classList.remove('light');
+    htmlElement.classList.add('dark');
+    themeIcon.textContent = '☀️';
+  } else {
+    htmlElement.classList.remove('dark');
+    htmlElement.classList.add('light');
+    themeIcon.textContent = '🌙';
+  }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  getWeather("Lucknow");
+// --- 3. DYNAMIC DAY/NIGHT BACKGROUND SWITCHER ---
+function evalDayNightBackground(currentTimeStr, sunriseStr, sunsetStr) {
+  const parseToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    const upper = timeStr.toUpperCase();
+    const hasPM = upper.includes('PM');
+    const hasAM = upper.includes('AM');
+    
+    const numericTokens = upper.replace(/AM|PM/g, '').trim();
+    let [hours, minutes] = numericTokens.split(':').map(Number);
+    
+    if (hasPM && hours < 12) hours += 12;
+    if (hasAM && hours === 12) hours = 0;
+    
+    return hours * 60 + minutes;
+  };
+
+  const current = parseToMinutes(currentTimeStr);
+  const sunrise = parseToMinutes(sunriseStr);
+  const sunset = parseToMinutes(sunsetStr);
+
+  if (current >= sunrise && current < sunset) {
+    sidebarCard.classList.add('day-bg');
+    sidebarCard.classList.remove('night-bg');
+  } else {
+    sidebarCard.classList.add('night-bg');
+    sidebarCard.classList.remove('day-bg');
+  }
+}
+
+// --- INIT APP RUN ---
+document.addEventListener('DOMContentLoaded', () => {
+  renderHourlyForecast();
+  renderWeeklyForecast();
+  
+  // Running dynamic check against layout settings
+  const curTime = document.getElementById('local-time-text').textContent.split(' ')[1]; // extracts "21:51"
+  const sunrise = document.getElementById('sunrise-time').textContent;
+  const sunset = document.getElementById('sunset-time').textContent;
+  
+  evalDayNightBackground(curTime, sunrise, sunset);
 });
