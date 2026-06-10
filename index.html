@@ -12,36 +12,42 @@
     
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h1 class="logo">Skye</h1>
-        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme">
-          <span class="theme-icon">☀️</span>
-        </button>
+        <div class="logo-wrapper">
+          <span class="logo-icon">✨</span>
+          <h1 class="logo">Skye</h1>
+        </div>
+        <button id="theme-toggle" class="theme-switch-btn" aria-label="Toggle Theme">☀️</button>
       </div>
       
+      <div class="search-wrapper">
+        <input type="text" id="search-input" value="Lucknow" placeholder="Search city...">
+        <button id="search-btn" class="search-icon">🔍</button>
+      </div>
+
       <div id="sidebar-weather-card" class="weather-card">
         <div class="main-temp-wrapper">
-          <span id="current-temp" class="temp-display">36</span>
-          <span class="unit-toggle">°C / °F</span>
+          <span id="current-temp" class="temp-display">--</span>
+          <span class="unit-toggle">°C</span>
         </div>
         <div id="weather-icon-display" class="condition-icon">☁️</div>
-        <p id="weather-condition" class="condition-text">Mist</p>
-        <p class="feels-like">Feels like <span id="feels-like-temp">40°C</span></p>
+        <p id="weather-condition" class="condition-text">Loading...</p>
+        <p class="feels-like">Feels like <span id="feels-like-temp">--°C</span></p>
         
         <hr class="divider">
         
         <div class="location-details">
-          <p id="location-text" class="location-name">Lucknow, India</p>
-          <p id="local-time-text" class="date-string">2026-06-10 21:51</p>
+          <p id="location-text" class="location-name">📍 --, --</p>
+          <p id="local-time-text" class="date-string">--</p>
         </div>
 
         <div class="sun-phases">
           <div class="sun-item">
             <span class="sun-label">☀️ Sunrise</span>
-            <span id="sunrise-time" class="sun-value">05:11 AM</span>
+            <span id="sunrise-time" class="sun-value">--:-- AM</span>
           </div>
           <div class="sun-item">
             <span class="sun-label">🌙 Sunset</span>
-            <span id="sunset-time" class="sun-value">06:59 PM</span>
+            <span id="sunset-time" class="sun-value">--:-- PM</span>
           </div>
         </div>
       </div>
@@ -57,36 +63,36 @@
         </div>
       </header>
 
-      <section id="hourly-forecast-view" class="forecast-view-panel">
+      <section id="today-forecast-panel" class="forecast-view-panel">
         <h3 class="section-title">Today's Highlights</h3>
         
         <div class="highlights-grid">
           <div class="metrics-card">
-            <div class="card-header"><span>WIND</span> <span class="icon">💨</span></div>
-            <div class="metric-value"><span id="wind-speed">12</span> <span class="unit">km/h</span></div>
+            <div class="card-header"><span>WIND STATUS</span> <span class="icon">💨</span></div>
+            <div class="metric-value"><span id="wind-speed">--</span> <span class="unit">km/h</span></div>
           </div>
           <div class="metrics-card">
             <div class="card-header"><span>HUMIDITY</span> <span class="icon">💧</span></div>
-            <div class="metric-value"><span id="humidity-value">39</span> <span class="unit">%</span></div>
+            <div class="metric-value"><span id="humidity-value">--</span> <span class="unit">%</span></div>
             <div class="progress-bar-container">
-              <div id="humidity-bar" class="progress-fill" style="width: 39%;"></div>
+              <div id="humidity-bar" class="progress-fill" style="width: 0%;"></div>
             </div>
           </div>
           <div class="metrics-card">
             <div class="card-header"><span>UV INDEX</span> <span class="icon">☀️</span></div>
-            <div class="metric-value"><span id="uv-index">0</span></div>
+            <div class="metric-value"><span id="uv-index">--</span></div>
           </div>
           <div class="metrics-card">
             <div class="card-header"><span>PRESSURE</span> <span class="icon">⏲️</span></div>
-            <div class="metric-value"><span id="pressure-value">998</span> <span class="unit">hPa</span></div>
+            <div class="metric-value"><span id="pressure-value">--</span> <span class="unit">hPa</span></div>
           </div>
           <div class="metrics-card">
             <div class="card-header"><span>VISIBILITY</span> <span class="icon">👁️</span></div>
-            <div class="metric-value"><span id="visibility-value">5</span> <span class="unit">km</span></div>
+            <div class="metric-value"><span id="visibility-value">--</span> <span class="unit">km</span></div>
           </div>
           <div class="metrics-card">
             <div class="card-header"><span>CLOUD COVER</span> <span class="icon">☁️</span></div>
-            <div class="metric-value"><span id="cloud-value">0</span> <span class="unit">%</span></div>
+            <div class="metric-value"><span id="cloud-value">--</span> <span class="unit">%</span></div>
           </div>
         </div>
 
@@ -95,7 +101,7 @@
           </div>
       </section>
 
-      <section id="weekly-forecast-view" class="forecast-view-panel hidden">
+      <section id="weekly-forecast-panel" class="forecast-view-panel hidden">
         <h3 class="section-title">This Week's Forecast</h3>
         <div class="weekly-list-container" id="weekly-cards-container">
           </div>
