@@ -11,7 +11,15 @@
 </head>
 <body>
 
-  <!-- ── Search overlay ─────────────────────────────────────────── -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loader-content">
+      <div class="loader-ring"></div>
+      <p>Fetching weather insights...</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Message</div>
+
   <div class="search-overlay" id="searchOverlay">
     <div class="search-box">
       <div class="search-input-wrap">
@@ -25,10 +33,8 @@
     </div>
   </div>
 
-  <!-- ── App shell ───────────────────────────────────────────────── -->
   <div class="app" id="app">
 
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-top">
         <div class="brand">
@@ -41,7 +47,6 @@
       </div>
 
       <div class="sidebar-main">
-        <!-- Big temperature -->
         <div class="temp-display">
           <span class="temp-value" id="temperature">--</span>
           <div class="temp-unit-toggle">
@@ -53,7 +58,7 @@
 
         <div class="weather-icon-wrap" id="weatherIconWrap">
           <div class="weather-icon-placeholder">
-            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.1)" stroke-width="2" stroke-dasharray="4 4"/></svg>
+            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" stroke="rgba(0,0,0,0.05)" stroke-width="2" stroke-dasharray="4 4"/></svg>
           </div>
         </div>
 
@@ -72,7 +77,6 @@
 
         <div class="sidebar-divider"></div>
 
-        <!-- Sun times -->
         <div class="sun-times">
           <div class="sun-item">
             <svg class="sun-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
@@ -92,10 +96,8 @@
       </div>
     </aside>
 
-    <!-- Main content -->
     <main class="main">
 
-      <!-- Top bar -->
       <div class="topbar">
         <div class="topbar-tabs">
           <button class="tab active" data-tab="today">Today</button>
@@ -109,10 +111,7 @@
         </div>
       </div>
 
-      <!-- ── Today panel ──────────────────────────────────────────── -->
       <div class="panel active" id="panel-today">
-
-        <!-- Highlights grid -->
         <section class="section">
           <h2 class="section-title">Today's Highlights</h2>
           <div class="highlights-grid">
@@ -143,8 +142,10 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
                 </div>
               </div>
-              <span class="hcard-value" id="humidity">--</span>
-              <span class="hcard-unit">%</span>
+              <div>
+                <span class="hcard-value" id="humidity">--</span>
+                <span class="hcard-unit">%</span>
+              </div>
               <div class="gauge-bar"><div class="gauge-fill" id="humGauge"></div></div>
               <p class="gauge-hint" id="humHint">--</p>
             </div>
@@ -168,9 +169,11 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 </div>
               </div>
-              <span class="hcard-value" id="pressure">--</span>
-              <span class="hcard-unit">hPa</span>
-              <p class="gauge-hint" id="presHint">--</p>
+              <div>
+                <span class="hcard-value" id="pressure">--</span>
+                <span class="hcard-unit">hPa</span>
+              </div>
+              <p class="gauge-hint" id="presHint">Normal</p>
             </div>
 
             <div class="highlight-card" id="card-visibility">
@@ -180,8 +183,10 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 </div>
               </div>
-              <span class="hcard-value" id="visibility">--</span>
-              <span class="hcard-unit">km</span>
+              <div>
+                <span class="hcard-value" id="visibility">--</span>
+                <span class="hcard-unit">km</span>
+              </div>
               <p class="gauge-hint" id="visHint">--</p>
             </div>
 
@@ -192,47 +197,35 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
                 </div>
               </div>
-              <span class="hcard-value" id="clouds">--</span>
-              <span class="hcard-unit">%</span>
+              <div>
+                <span class="hcard-value" id="clouds">--</span>
+                <span class="hcard-unit">%</span>
+              </div>
               <div class="gauge-bar"><div class="gauge-fill cloud-gauge" id="cloudGauge"></div></div>
             </div>
 
           </div>
         </section>
 
-        <!-- Hourly strip -->
         <section class="section">
-          <h2 class="section-title">Hourly</h2>
+          <h2 class="section-title">Hourly Forecast</h2>
           <div class="hourly-strip" id="hourlyStrip">
-            <p class="empty-state">Loading hourly…</p>
+            <p class="empty-state">Loading hourly forecast…</p>
           </div>
         </section>
-
       </div>
 
-      <!-- ── Week panel ───────────────────────────────────────────── -->
       <div class="panel" id="panel-week">
         <section class="section">
           <h2 class="section-title">7-Day Forecast</h2>
           <div class="forecast-list" id="forecastList">
-            <p class="empty-state">Loading forecast…</p>
+            <p class="empty-state">Loading weekly forecast…</p>
           </div>
         </section>
       </div>
 
     </main>
   </div>
-
-  <!-- Loading screen -->
-  <div class="loading-screen" id="loadingScreen">
-    <div class="loader-content">
-      <div class="loader-ring"></div>
-      <p>Fetching weather…</p>
-    </div>
-  </div>
-
-  <!-- Error toast -->
-  <div class="toast" id="toast"></div>
 
   <script src="script.js"></script>
 </body>
