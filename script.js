@@ -1,109 +1,139 @@
-// --- DOM CORE STRUCTURAL SELECTORS ---
+// --- LIVE ROUTE ACCESS CREDS ---
+const API_KEY = "f400d12c089a4750817180949250304";
+const BASE_URL = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&days=7&q=`;
+
+// --- DOM ELEMENT TARGET LAYERS ---
+const searchInput = document.getElementById('search-input');
+const searchBtn = document.getElementById('search-btn');
 const tabToday = document.getElementById('tab-today');
 const tabWeek = document.getElementById('tab-week');
-const hourlyView = document.getElementById('hourly-forecast-view');
-const weeklyView = document.getElementById('weekly-forecast-view');
+const todayPanel = document.getElementById('today-forecast-panel');
+const weeklyPanel = document.getElementById('weekly-forecast-panel');
 const liveBadge = document.getElementById('live-badge');
 const themeToggle = document.getElementById('theme-toggle');
 const sidebarCard = document.getElementById('sidebar-weather-card');
 
+// --- TEXT NODE TARGET SELECTION ELEMENTS ---
+const currentTemp = document.getElementById('current-temp');
+const weatherCondition = document.getElementById('weather-condition');
+const weatherIconDisplay = document.getElementById('weather-icon-display');
+const feelsLikeTemp = document.getElementById('feels-like-temp');
+const locationText = document.getElementById('location-text');
+const localTimeText = document.getElementById('local-time-text');
+const sunriseTime = document.getElementById('sunrise-time');
+const sunsetTime = document.getElementById('sunset-time');
+
+const windSpeed = document.getElementById('wind-speed');
+const humidityValue = document.getElementById('humidity-value');
+const humidityBar = document.getElementById('humidity-bar');
+const uvIndex = document.getElementById('uv-index');
+const pressureValue = document.getElementById('pressure-value');
+const visibilityValue = document.getElementById('visibility-value');
+const cloudValue = document.getElementById('cloud-value');
+
 const hourlyCardsContainer = document.getElementById('hourly-cards-container');
 const weeklyCardsContainer = document.getElementById('weekly-cards-container');
 
-// --- SIMULATED WEATHER RAW MOCK DATA STRUCT ---
-const mockHourlyData = [
-  { time: "13:00", temp: 47, icon: "☁️", pop: 0 },
-  { time: "14:00", temp: 45, icon: "☁️", pop: 0 },
-  { time: "15:00", temp: 45, icon: "☁️", pop: 0 },
-  { time: "16:00", temp: 44, icon: "☁️", pop: 0 },
-  { time: "17:00", temp: 44, icon: "⛈️", pop: 7 },
-  { time: "18:00", temp: 43, icon: "☁️", pop: 0 },
-  { time: "19:00", temp: 41, icon: "☁️", pop: 0 },
-  { time: "20:00", temp: 40, icon: "🌙", pop: 17 },
-  { time: "21:00", temp: 36, icon: "🌙", pop: 17 },
-  { time: "22:00", temp: 39, icon: "🌙", pop: 3 },
-  { time: "23:00", temp: 39, icon: "🌙", pop: 20 }
-];
+// --- 1. LIVE DATA CONNECTOR REQUEST ---
+async function fetchWeatherData(city) {
+  if (!city) return;
+  
+  try {
+    const response = await fetch(`${BASE_URL}${encodeURIComponent(city)}`);
+    if (!response.ok) throw new Error('Data endpoint error');
+    
+    const data = await response.json();
+    populateDashboard(data);
+  } catch (error) {
+    console.error("Critical API Fault:", error);
+    alert("Lookup failed. Please verify target destination search terms.");
+  }
+}
 
-const mockWeeklyData = [
-  { day: "Wednesday 10 June", tempMax: 47, tempMin: 34, condition: "Patchy rain nearby", icon: "🌦️" },
-  { day: "Thursday 11 June", tempMax: 45, tempMin: 32, condition: "Patchy rain nearby", icon: "🌦️" },
-  { day: "Friday 12 June", tempMax: 43, tempMin: 30, condition: "Sunny skies", icon: "☀️" },
-  { day: "Saturday 13 June", tempMax: 42, tempMin: 29, condition: "Clear Sky", icon: "☀️" },
-  { day: "Sunday 14 June", tempMax: 44, tempMin: 31, condition: "Partly Cloudy", icon: "⛅" }
-];
+// --- 2. MAP DYNAMIC INCOMING FIELDS INTO DOM NODES ---
+function populateDashboard(data) {
+  // Process Primary Weather Elements
+  currentTemp.textContent = Math.round(data.current.temp_c);
+  weatherCondition.textContent = data.current.condition.text;
+  weatherIconDisplay.innerHTML = `<img src="https:${data.current.condition.icon}" alt="condition thumbnail" width="64">`;
+  feelsLikeTemp.textContent = `${Math.round(data.current.feelslike_c)}°C`;
+  locationText.textContent = `📍 ${data.location.name}, ${data.location.country}`;
+  localTimeText.textContent = data.location.localtime;
+  
+  // Astro Calculations
+  const astro = data.forecast.forecastday[0].astro;
+  sunriseTime.textContent = astro.sunrise;
+  sunsetTime.textContent = astro.sunset;
 
-// --- 1. TAB RENDERING & TRANSITION LOGIC ---
-function renderHourlyForecast() {
+  // Highlights Elements Rendering
+  windSpeed.textContent = data.current.wind_kph;
+  humidityValue.textContent = data.current.humidity;
+  humidityBar.style.width = `${data.current.humidity}%`;
+  uvIndex.textContent = data.current.uv;
+  pressureValue.textContent = data.current.pressure_mb;
+  visibilityValue.textContent = data.current.vis_km;
+  cloudValue.textContent = data.current.cloud;
+
+  // Process 24h Scrolling Row Data
   hourlyCardsContainer.innerHTML = '';
-  mockHourlyData.forEach(item => {
+  const currentHoursArray = data.forecast.forecastday[0].hour;
+  currentHoursArray.forEach(item => {
+    const timeOnly = item.time.split(' ')[1]; 
     const card = document.createElement('div');
     card.className = 'hour-card';
     card.innerHTML = `
-      <div style="font-size: 14px; color: var(--text-muted);">${item.time}</div>
-      <div style="font-size: 24px; margin: 4px 0;">${item.icon}</div>
-      <div style="font-weight: 600;">${item.temp}°</div>
-      <div style="font-size: 11px; color: #3b82f6;">${item.pop}%</div>
+      <div style="font-size: 13px; color: var(--text-muted);">${timeOnly}</div>
+      <div><img src="https:${item.condition.icon}" width="36"></div>
+      <div style="font-weight: 600; font-size: 16px;">${Math.round(item.temp_c)}°</div>
+      <div style="font-size: 11px; color: var(--accent-color); font-weight: bold;">💧${item.chance_of_rain}%</div>
     `;
     hourlyCardsContainer.appendChild(card);
   });
-}
 
-function renderWeeklyForecast() {
+  // Process 7-Day Extended Weather Rows
   weeklyCardsContainer.innerHTML = '';
-  mockWeeklyData.forEach(item => {
+  const daysArray = data.forecast.forecastday;
+  daysArray.forEach(dayItem => {
+    const parsedDate = new Date(dayItem.date);
+    const dayOptions = { weekday: 'long', day: 'numeric', month: 'short' };
+    const formattedDay = parsedDate.toLocaleDateString('en-US', dayOptions);
+
     const row = document.createElement('div');
     row.className = 'week-row-card';
     row.innerHTML = `
-      <div style="font-weight: 500; min-width: 160px;">${item.day}</div>
-      <div style="display: flex; align-items: center; gap: 8px; color: var(--text-muted);">
-        <span style="font-size: 20px;">${item.icon}</span>
-        <span>${item.condition}</span>
+      <div style="font-weight: 600; min-width: 180px;">${formattedDay}</div>
+      <div style="display: flex; align-items: center; gap: 12px; color: var(--text-muted); flex: 1;">
+        <img src="https:${dayItem.day.condition.icon}" width="40">
+        <span style="font-weight: 500;">${dayItem.day.condition.text}</span>
       </div>
-      <div style="font-weight: 600;">
-        <span>${item.tempMax}°C</span> / <span style="color: var(--text-muted); font-weight: 400;">${item.tempMin}°C</span>
+      <div style="font-weight: 600; font-size: 15px;">
+        <span>${Math.round(dayItem.day.maxtemp_c)}°C</span> 
+        <span style="color: var(--text-muted); font-weight: 400; margin-left: 8px;">${Math.round(dayItem.day.mintemp_c)}°C</span>
       </div>
     `;
     weeklyCardsContainer.appendChild(row);
   });
+
+  // Fire ambient shift calculation instantly on incoming site time metrics
+  const localHourStr = data.location.localtime.split(' ')[1]; 
+  evalDayNightBackground(localHourStr, astro.sunrise, astro.sunset);
 }
 
-function setForecastView(view) {
-  if (view === 'today') {
-    tabToday.classList.add('active');
-    tabWeek.classList.remove('active');
-    hourlyView.classList.remove('hidden');
-    weeklyView.classList.add('hidden');
-    liveBadge.classList.remove('hidden'); 
-  } else {
-    tabWeek.classList.add('active');
-    tabToday.classList.remove('active');
-    weeklyView.classList.remove('hidden');
-    hourlyView.classList.add('hidden');
-    liveBadge.classList.add('hidden'); 
-  }
-}
-
-tabToday.addEventListener('click', () => setForecastView('today'));
-tabWeek.addEventListener('click', () => setForecastView('week'));
-
-// --- 2. THEME CONTROLLER ENGINE (Light/Dark Switch) ---
+// --- 3. THEME VARIATION SWITCH ---
 themeToggle.addEventListener('click', () => {
   const htmlElement = document.documentElement;
-  const themeIcon = themeToggle.querySelector('.theme-icon');
-
   if (htmlElement.classList.contains('light')) {
     htmlElement.classList.remove('light');
     htmlElement.classList.add('dark');
-    themeIcon.textContent = '☀️';
+    themeToggle.textContent = '☀️'; 
   } else {
     htmlElement.classList.remove('dark');
     htmlElement.classList.add('light');
-    themeIcon.textContent = '🌙';
+    themeToggle.textContent = '🌙'; 
   }
 });
 
-// --- 3. DYNAMIC DAY/NIGHT BACKGROUND SWITCHER ---
+// --- 4. RUN GRADIENT SIDEBAR CHECKS ---
 function evalDayNightBackground(currentTimeStr, sunriseStr, sunsetStr) {
   const parseToMinutes = (timeStr) => {
     if (!timeStr) return 0;
@@ -133,15 +163,33 @@ function evalDayNightBackground(currentTimeStr, sunriseStr, sunsetStr) {
   }
 }
 
-// --- INIT APP RUN ---
+// --- 5. PANEL SWAP INTERACTIVITIES (Tabs Toggle) ---
+function switchView(targetMode) {
+  if (targetMode === 'today') {
+    tabToday.classList.add('active');
+    tabWeek.classList.remove('active');
+    todayPanel.classList.remove('hidden');   
+    weeklyPanel.classList.add('hidden');       
+    liveBadge.classList.remove('hidden');
+  } else {
+    tabWeek.classList.add('active');
+    tabToday.classList.remove('active');
+    weeklyPanel.classList.remove('hidden');    
+    todayPanel.classList.add('hidden');      
+    liveBadge.classList.add('hidden');
+  }
+}
+
+tabToday.addEventListener('click', () => switchView('today'));
+tabWeek.addEventListener('click', () => switchView('week'));
+
+// --- 6. TRIGGER LOOKUP PORTS ---
+searchBtn.addEventListener('click', () => fetchWeatherData(searchInput.value));
+searchInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') fetchWeatherData(searchInput.value);
+});
+
+// --- ENTRY COMPONENT INITS ---
 document.addEventListener('DOMContentLoaded', () => {
-  renderHourlyForecast();
-  renderWeeklyForecast();
-  
-  // Running dynamic check against layout settings
-  const curTime = document.getElementById('local-time-text').textContent.split(' ')[1]; // extracts "21:51"
-  const sunrise = document.getElementById('sunrise-time').textContent;
-  const sunset = document.getElementById('sunset-time').textContent;
-  
-  evalDayNightBackground(curTime, sunrise, sunset);
+  fetchWeatherData(searchInput.value);
 });
