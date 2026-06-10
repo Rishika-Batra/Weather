@@ -1,228 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Skye — Weather</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="loading-screen" id="loadingScreen">
-    <div class="loader-content">
-      <div class="loader-ring"></div>
-      <p>Fetching weather insights...</p>
-    </div>
-  </div>
-
-  <div class="toast" id="toast">Message</div>
-
-  <div class="search-overlay" id="searchOverlay">
-    <div class="search-box">
-      <div class="search-input-wrap">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="cityInput" placeholder="Search city…" autocomplete="off" />
-        <button class="search-close" id="searchClose">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
-      <div class="search-hint">Press Enter to search or Esc to cancel</div>
-    </div>
-  </div>
-
-  <div class="app" id="app">
-
+  <div class="app-container">
+    
     <aside class="sidebar">
-      <div class="sidebar-top">
-        <div class="brand">
-          <svg class="brand-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-          <span>Skye</span>
-        </div>
-        <button class="search-trigger" id="searchTrigger" title="Search city">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <div class="sidebar-header">
+        <h1 class="logo">Skye</h1>
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme">
+          <span class="theme-icon">☀️</span>
         </button>
       </div>
-
-      <div class="sidebar-main">
-        <div class="temp-display">
-          <span class="temp-value" id="temperature">--</span>
-          <div class="temp-unit-toggle">
-            <button class="unit-btn active" id="btnC" data-unit="C">°C</button>
-            <span class="unit-sep">/</span>
-            <button class="unit-btn" id="btnF" data-unit="F">°F</button>
-          </div>
+      
+      <div id="sidebar-weather-card" class="weather-card">
+        <div class="main-temp-wrapper">
+          <span id="current-temp" class="temp-display">36</span>
+          <span class="unit-toggle">°C / °F</span>
+        </div>
+        <div id="weather-icon-display" class="condition-icon">☁️</div>
+        <p id="weather-condition" class="condition-text">Mist</p>
+        <p class="feels-like">Feels like <span id="feels-like-temp">40°C</span></p>
+        
+        <hr class="divider">
+        
+        <div class="location-details">
+          <p id="location-text" class="location-name">Lucknow, India</p>
+          <p id="local-time-text" class="date-string">2026-06-10 21:51</p>
         </div>
 
-        <div class="weather-icon-wrap" id="weatherIconWrap">
-          <div class="weather-icon-placeholder">
-            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" stroke="rgba(0,0,0,0.05)" stroke-width="2" stroke-dasharray="4 4"/></svg>
-          </div>
-        </div>
-
-        <p class="condition-text" id="conditionText">Loading…</p>
-        <p class="feels-like" id="feelsLike">Feels like --</p>
-
-        <div class="sidebar-divider"></div>
-
-        <div class="location-info">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <div>
-            <p class="city-name" id="cityName">--</p>
-            <p class="local-time" id="localTime">--</p>
-          </div>
-        </div>
-
-        <div class="sidebar-divider"></div>
-
-        <div class="sun-times">
+        <div class="sun-phases">
           <div class="sun-item">
-            <svg class="sun-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-            <div>
-              <p class="sun-label">Sunrise</p>
-              <p class="sun-val" id="sunrise">--</p>
-            </div>
+            <span class="sun-label">☀️ Sunrise</span>
+            <span id="sunrise-time" class="sun-value">05:11 AM</span>
           </div>
           <div class="sun-item">
-            <svg class="sun-svg sunset-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-            <div>
-              <p class="sun-label">Sunset</p>
-              <p class="sun-val" id="sunset">--</p>
-            </div>
+            <span class="sun-label">🌙 Sunset</span>
+            <span id="sunset-time" class="sun-value">06:59 PM</span>
           </div>
         </div>
       </div>
     </aside>
 
-    <main class="main">
-
-      <div class="topbar">
-        <div class="topbar-tabs">
-          <button class="tab active" data-tab="today">Today</button>
-          <button class="tab" data-tab="week">This week</button>
+    <main class="main-content">
+      
+      <header class="dashboard-header">
+        <div class="tab-container">
+          <button id="tab-today" class="tab-btn active">Today</button>
+          <button id="tab-week" class="tab-btn">This week</button>
+          <span id="live-badge" class="badge-live">● Live</span>
         </div>
-        <div class="topbar-right">
-          <div class="api-status" id="apiStatus">
-            <span class="status-dot"></span>
-            <span>Live</span>
+      </header>
+
+      <section id="hourly-forecast-view" class="forecast-view-panel">
+        <h3 class="section-title">Today's Highlights</h3>
+        
+        <div class="highlights-grid">
+          <div class="metrics-card">
+            <div class="card-header"><span>WIND</span> <span class="icon">💨</span></div>
+            <div class="metric-value"><span id="wind-speed">12</span> <span class="unit">km/h</span></div>
+          </div>
+          <div class="metrics-card">
+            <div class="card-header"><span>HUMIDITY</span> <span class="icon">💧</span></div>
+            <div class="metric-value"><span id="humidity-value">39</span> <span class="unit">%</span></div>
+            <div class="progress-bar-container">
+              <div id="humidity-bar" class="progress-fill" style="width: 39%;"></div>
+            </div>
+          </div>
+          <div class="metrics-card">
+            <div class="card-header"><span>UV INDEX</span> <span class="icon">☀️</span></div>
+            <div class="metric-value"><span id="uv-index">0</span></div>
+          </div>
+          <div class="metrics-card">
+            <div class="card-header"><span>PRESSURE</span> <span class="icon">⏲️</span></div>
+            <div class="metric-value"><span id="pressure-value">998</span> <span class="unit">hPa</span></div>
+          </div>
+          <div class="metrics-card">
+            <div class="card-header"><span>VISIBILITY</span> <span class="icon">👁️</span></div>
+            <div class="metric-value"><span id="visibility-value">5</span> <span class="unit">km</span></div>
+          </div>
+          <div class="metrics-card">
+            <div class="card-header"><span>CLOUD COVER</span> <span class="icon">☁️</span></div>
+            <div class="metric-value"><span id="cloud-value">0</span> <span class="unit">%</span></div>
           </div>
         </div>
-      </div>
 
-      <div class="panel active" id="panel-today">
-        <section class="section">
-          <h2 class="section-title">Today's Highlights</h2>
-          <div class="highlights-grid">
-
-            <div class="highlight-card span2" id="card-wind">
-              <div class="hcard-header">
-                <span class="hcard-label">Wind</span>
-                <div class="hcard-icon wind-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
-                </div>
-              </div>
-              <div class="wind-display">
-                <span class="hcard-value" id="windSpeed">--</span>
-                <span class="hcard-unit">km/h</span>
-              </div>
-              <div class="wind-compass">
-                <div class="compass-ring">
-                  <div class="compass-needle" id="compassNeedle"></div>
-                  <span class="compass-dir" id="windDir">--</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="highlight-card" id="card-humidity">
-              <div class="hcard-header">
-                <span class="hcard-label">Humidity</span>
-                <div class="hcard-icon hum-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-                </div>
-              </div>
-              <div>
-                <span class="hcard-value" id="humidity">--</span>
-                <span class="hcard-unit">%</span>
-              </div>
-              <div class="gauge-bar"><div class="gauge-fill" id="humGauge"></div></div>
-              <p class="gauge-hint" id="humHint">--</p>
-            </div>
-
-            <div class="highlight-card" id="card-uv">
-              <div class="hcard-header">
-                <span class="hcard-label">UV Index</span>
-                <div class="hcard-icon uv-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                </div>
-              </div>
-              <span class="hcard-value" id="uvIndex">--</span>
-              <p class="uv-label" id="uvLabel">--</p>
-              <div class="uv-bar-track"><div class="uv-bar-fill" id="uvBar"></div></div>
-            </div>
-
-            <div class="highlight-card" id="card-pressure">
-              <div class="hcard-header">
-                <span class="hcard-label">Pressure</span>
-                <div class="hcard-icon pres-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                </div>
-              </div>
-              <div>
-                <span class="hcard-value" id="pressure">--</span>
-                <span class="hcard-unit">hPa</span>
-              </div>
-              <p class="gauge-hint" id="presHint">Normal</p>
-            </div>
-
-            <div class="highlight-card" id="card-visibility">
-              <div class="hcard-header">
-                <span class="hcard-label">Visibility</span>
-                <div class="hcard-icon vis-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                </div>
-              </div>
-              <div>
-                <span class="hcard-value" id="visibility">--</span>
-                <span class="hcard-unit">km</span>
-              </div>
-              <p class="gauge-hint" id="visHint">--</p>
-            </div>
-
-            <div class="highlight-card" id="card-clouds">
-              <div class="hcard-header">
-                <span class="hcard-label">Cloud Cover</span>
-                <div class="hcard-icon cloud-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
-                </div>
-              </div>
-              <div>
-                <span class="hcard-value" id="clouds">--</span>
-                <span class="hcard-unit">%</span>
-              </div>
-              <div class="gauge-bar"><div class="gauge-fill cloud-gauge" id="cloudGauge"></div></div>
-            </div>
-
+        <h3 class="section-title margin-top-lg">Hourly Forecast</h3>
+        <div class="horizontal-scroll-container" id="hourly-cards-container">
           </div>
-        </section>
+      </section>
 
-        <section class="section">
-          <h2 class="section-title">Hourly Forecast</h2>
-          <div class="hourly-strip" id="hourlyStrip">
-            <p class="empty-state">Loading hourly forecast…</p>
+      <section id="weekly-forecast-view" class="forecast-view-panel hidden">
+        <h3 class="section-title">This Week's Forecast</h3>
+        <div class="weekly-list-container" id="weekly-cards-container">
           </div>
-        </section>
-      </div>
-
-      <div class="panel" id="panel-week">
-        <section class="section">
-          <h2 class="section-title">7-Day Forecast</h2>
-          <div class="forecast-list" id="forecastList">
-            <p class="empty-state">Loading weekly forecast…</p>
-          </div>
-        </section>
-      </div>
+      </section>
 
     </main>
   </div>
