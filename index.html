@@ -13,7 +13,11 @@
 </head>
 <body class="dark-mode">
 
-  <div id="stars-container" class="stars-overlay"></div>
+  <div class="stars-wrapper">
+    <div id="stars-layer-dense"></div>
+    <div id="stars-layer-medium"></div>
+    <div id="stars-layer-distant"></div>
+  </div>
   <div id="weather-effects-container" class="weather-effects-overlay"></div>
 
   <div class="app-container">
@@ -76,6 +80,11 @@
     <main class="main-content">
       <header class="content-header">
         <h2 class="page-title">Dashboard Overview</h2>
+        
+        <div class="view-navigation-tabs">
+          <button id="tab-today" class="nav-tab active">Today</button>
+          <button id="tab-week" class="nav-tab">This Week</button>
+        </div>
       </header>
 
       <section class="highlights-section">
@@ -162,11 +171,17 @@
         </div>
       </section>
 
-      <section class="forecast-graph-section">
+      <section id="hourly-view-section" class="dynamic-forecast-view">
         <h3 class="section-title">Hourly Temperature Forecast Curve</h3>
         <div class="chart-container-wrapper">
           <canvas id="hourlyTempChart"></canvas>
         </div>
+      </section>
+
+      <section id="weekly-view-section" class="dynamic-forecast-view display-hidden">
+        <h3 class="section-title">Extended 7-Day Forecast Matrix</h3>
+        <div id="weekly-forecast-container" class="weekly-cards-grid">
+          </div>
       </section>
 
     </main>
