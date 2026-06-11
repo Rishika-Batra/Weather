@@ -1,25 +1,25 @@
 /* --- GLOBAL SYSTEM CONFIGURATION --- */
 :root {
-  --bg-app: #0c0f14;
-  --bg-sidebar: #131922;
-  --bg-card: #1a222f;
+  --bg-app: #080b11;
+  --bg-sidebar: #0f141c;
+  --bg-card: #151c27;
   --text-main: #ffffff;
-  --text-muted: #7f8f9f;
+  --text-muted: #78889b;
   --accent-blue: #3f8cff;
-  --border-line: rgba(255, 255, 255, 0.06);
+  --border-line: rgba(255, 255, 255, 0.05);
   --font-engine: 'Plus Jakarta Sans', sans-serif;
   --transition-speed: 0.35s;
 }
 
 /* LIGHT THEME SCHEME OVERRIDES */
 body.light-mode {
-  --bg-app: #e2f1ff;
+  --bg-app: #e6f2ff;
   --bg-sidebar: #ffffff;
   --bg-card: rgba(255, 255, 255, 0.85);
   --text-main: #1e293b;
   --text-muted: #64748b;
   --accent-blue: #0284c7;
-  --border-line: rgba(0, 0, 0, 0.05);
+  --border-line: rgba(0, 0, 0, 0.06);
 }
 
 * {
@@ -38,8 +38,75 @@ body {
   position: relative;
 }
 
-/* --- AMBIENT ATMOSPHERIC LAYER WRAPPERS --- */
-.stars-overlay, .weather-effects-overlay {
+/* --- HIGH-DENSITY REALISTIC DEEP SPACE STARFIELD MESH --- */
+.stars-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  display: block;
+}
+
+body.light-mode .stars-wrapper {
+  display: none; /* Hide starry space layout on light mode views */
+}
+
+/* Multi-layered custom astronomical field generators */
+#stars-layer-dense, #stars-layer-medium, #stars-layer-distant {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background-repeat: repeat;
+}
+
+#stars-layer-dense {
+  background-image: 
+    radial-gradient(1px 1px at 25px 40px, #ffffff, transparent),
+    radial-gradient(1.5px 1.5px at 75px 120px, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 140px 20px, #ffffff, transparent),
+    radial-gradient(2px 2px at 220px 310px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 300px 180px, #ffffff, transparent);
+  background-size: 350px 350px;
+  animation: cosmicPulse 8s infinite alternate linear;
+  opacity: 0.6;
+}
+
+#stars-layer-medium {
+  background-image: 
+    radial-gradient(1px 1px at 40px 200px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(2px 2px at 180px 90px, #ffffff, transparent),
+    radial-gradient(1.5px 1.5px at 290px 280px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 310px 40px, #ffffff, transparent);
+  background-size: 400px 400px;
+  animation: cosmicPulse 14s infinite alternate ease-in-out;
+  opacity: 0.45;
+}
+
+#stars-layer-distant {
+  background-image: 
+    radial-gradient(1px 1px at 10px 10px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 90px 230px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1.5px 1.5px at 150px 400px, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 270px 150px, rgba(255,255,255,0.5), transparent);
+  background-size: 500px 500px;
+  animation: cosmicPulse 20s infinite alternate ease-out;
+  opacity: 0.3;
+}
+
+@keyframes cosmicPulse {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+  50% { opacity: 0.7; }
+  100% { transform: translate(-10px, -20px) scale(1.01); opacity: 0.4; }
+}
+
+/* Weather Effects Fallback For Light System Configuration Themes */
+.weather-effects-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -48,52 +115,14 @@ body {
   pointer-events: none;
   z-index: 0;
 }
-
-/* Star Matrix Generation Logic */
-.dark-mode .stars-overlay {
-  background-image: 
-    radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
-    radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
-    radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
-  background-size: 550px 550px, 350px 350px, 250px 250px;
-  background-position: 0 0, 40px 60px, 130px 270px;
-  animation: starTwinkle 12s infinite linear;
-  opacity: 0.45;
-}
-
-@keyframes starTwinkle {
-  0% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.02); }
-  100% { opacity: 0.3; transform: scale(1); }
-}
-
-/* Light Mode Weather Themes Styling */
 body.light-mode.sunny .weather-effects-overlay {
-  background: radial-gradient(circle at top right, rgba(253, 224, 71, 0.3) 0%, transparent 60%);
-  animation: sunGlow 8s infinite alternate ease-in-out;
+  background: radial-gradient(circle at top right, rgba(253, 224, 71, 0.25) 0%, transparent 65%);
 }
-
 body.light-mode.cloudy .weather-effects-overlay {
-  background: linear-gradient(to bottom, rgba(203, 213, 225, 0.4), transparent);
+  background: linear-gradient(to bottom, rgba(203, 213, 225, 0.35), transparent);
 }
 
-body.light-mode.snowy .weather-effects-overlay {
-  background: radial-gradient(circle, #fff 1px, transparent 1px);
-  background-size: 20px 20px;
-  animation: snowFalling 4s linear infinite;
-}
-
-@keyframes sunGlow {
-  0% { opacity: 0.7; }
-  100% { opacity: 1; }
-}
-
-@keyframes snowFalling {
-  0% { background-position: 0px 0px; }
-  100% { background-position: 20px 400px; }
-}
-
-/* --- GRID CONTAINMENT ARCHITECTURE --- */
+/* --- APP CONTAINER SCHEMATIC LAYOUT --- */
 .app-container {
   display: flex;
   min-height: 100vh;
@@ -101,7 +130,7 @@ body.light-mode.snowy .weather-effects-overlay {
   z-index: 1;
 }
 
-/* SIDEBAR STYLING */
+/* SIDEBAR SYSTEM ENGINE */
 .sidebar {
   width: 320px;
   background-color: var(--bg-sidebar);
@@ -109,7 +138,7 @@ body.light-mode.snowy .weather-effects-overlay {
   padding: 2.5rem 1.75rem;
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   transition: background-color var(--transition-speed) ease;
 }
 
@@ -147,7 +176,6 @@ body.light-mode.snowy .weather-effects-overlay {
   transform: rotate(20deg) scale(1.05);
 }
 
-/* SEARCH NODE */
 .search-wrapper {
   display: flex;
   background-color: var(--bg-card);
@@ -184,10 +212,8 @@ body.light-mode.snowy .weather-effects-overlay {
   font-weight: 500;
 }
 
-/* WEATHER CENTRAL STATIONS */
 .main-weather-display {
   margin: 2rem 0;
-  text-align: left;
 }
 
 #current-temp {
@@ -248,7 +274,7 @@ body.light-mode.snowy .weather-effects-overlay {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.15);
   padding: 1rem;
   border-radius: 14px;
 }
@@ -258,13 +284,12 @@ body.light-mode.snowy .weather-effects-overlay {
   align-items: center;
   gap: 1rem;
 }
-
 .astro-sun-icon { color: #f59e0b; font-size: 1.25rem;}
 .astro-moon-icon { color: #3b82f6; font-size: 1.25rem;}
 .astro-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;}
 .astro-value { font-size: 0.95rem; font-weight: 600;}
 
-/* MAIN BODY REGION STYLE CODES */
+/* MAIN BODY SEGMENT STRUCTURE */
 .main-content {
   flex: 1;
   padding: 2.5rem 3rem;
@@ -288,7 +313,37 @@ body.light-mode.snowy .weather-effects-overlay {
   letter-spacing: -0.3px;
 }
 
-/* SECTION HEADINGS */
+/* VIEW INTERFACE TOGGLE CONTROL HEADERS */
+.view-navigation-tabs {
+  display: flex;
+  background: var(--bg-sidebar);
+  padding: 0.35rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-line);
+  gap: 0.25rem;
+}
+
+.nav-tab {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-tab:hover {
+  color: var(--text-main);
+}
+
+.nav-tab.active {
+  background: var(--accent-blue);
+  color: #ffffff;
+}
+
 .section-title {
   font-size: 1.1rem;
   font-weight: 700;
@@ -298,7 +353,7 @@ body.light-mode.snowy .weather-effects-overlay {
   margin-bottom: 1.25rem;
 }
 
-/* METRICS CARD PANELS MATRIX */
+/* DATA CARD HIGHLIGHT GRID SYSTEM */
 .highlights-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -314,7 +369,7 @@ body.light-mode.snowy .weather-effects-overlay {
   flex-direction: column;
   justify-content: space-between;
   min-height: 160px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
   transition: transform 0.25s ease, background-color var(--transition-speed) ease;
 }
 
@@ -330,36 +385,12 @@ body.light-mode.snowy .weather-effects-overlay {
   font-weight: 500;
 }
 
-.metric-icon {
-  color: var(--accent-blue);
-  font-size: 1.1rem;
-}
+.metric-icon { color: var(--accent-blue); font-size: 1.1rem; }
+.metric-value-container { margin: 1rem 0; display: flex; align-items: baseline; gap: 0.25rem; }
+.metric-number { font-size: 2.5rem; font-weight: 600; letter-spacing: -1px; }
+.metric-unit { font-size: 1.1rem; color: var(--text-muted); }
+.metric-footer-text { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
-.metric-value-container {
-  margin: 1rem 0;
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-}
-
-.metric-number {
-  font-size: 2.5rem;
-  font-weight: 600;
-  letter-spacing: -1px;
-}
-
-.metric-unit {
-  font-size: 1.1rem;
-  color: var(--text-muted);
-}
-
-.metric-footer-text {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-/* PROGRESS FILL METRIC GRAPHICS */
 .progress-bar-container {
   width: 100%;
   height: 6px;
@@ -368,43 +399,23 @@ body.light-mode.snowy .weather-effects-overlay {
   overflow: hidden;
   margin-top: auto;
 }
-body.light-mode .progress-bar-container {
-  background: rgba(0, 0, 0, 0.06);
-}
+body.light-mode .progress-bar-container { background: rgba(0, 0, 0, 0.06); }
+.progress-fill { height: 100%; background: var(--accent-blue); border-radius: 3px; transition: width 0.8s ease; }
 
-.progress-fill {
-  height: 100%;
-  background: var(--accent-blue);
-  border-radius: 3px;
-  transition: width 0.8s ease-in-out;
-}
+.uv-spectrum-bar { width: 100%; height: 6px; background: linear-gradient(to right, #34d399, #f59e0b, #ef4444); border-radius: 3px; position: relative; margin-top: auto; }
+.uv-indicator-dot { width: 10px; height: 10px; background: white; border: 2px solid var(--bg-app); border-radius: 50%; position: absolute; top: -2px; transform: translateX(-50%); transition: left 0.8s ease; }
 
-.uv-spectrum-bar {
+/* DYNAMIC HOURLY & WEEKLY VIEW VISIBILITY ENGINE */
+.dynamic-forecast-view {
   width: 100%;
-  height: 6px;
-  background: linear-gradient(to right, #34d399, #f59e0b, #ef4444);
-  border-radius: 3px;
-  position: relative;
-  margin-top: auto;
+  transition: opacity 0.3s ease-in-out;
 }
 
-.uv-indicator-dot {
-  width: 10px;
-  height: 10px;
-  background: white;
-  border: 2px solid var(--bg-app);
-  border-radius: 50%;
-  position: absolute;
-  top: -2px;
-  transform: translateX(-50%);
-  transition: left 0.8s ease-in-out;
+.display-hidden {
+  display: none !important;
 }
 
-/* HOURLY GRAPH WORKBENCH AREA */
-.forecast-graph-section {
-  width: 100%;
-}
-
+/* VIEW A: HOURLY CANVASES AREA */
 .chart-container-wrapper {
   background: var(--bg-card);
   border: 1px solid var(--border-line);
@@ -412,10 +423,75 @@ body.light-mode .progress-bar-container {
   border-radius: 16px;
   width: 100%;
   height: 320px;
-  position: relative;
 }
 
-/* RESPONSIVE LAYOUT MATRIX CONSTRAINTS */
+/* VIEW B: WEEKLY CARDS TIMELINE FLEXMESH */
+.weekly-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1.25rem;
+}
+
+.weekly-forecast-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-line);
+  border-radius: 16px;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  transition: transform 0.2s ease;
+}
+
+.weekly-forecast-card:hover {
+  transform: scale(1.03);
+}
+
+.weekly-day-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.weekly-card-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: -4px;
+}
+
+.weekly-icon-wrapper img {
+  width: 48px;
+  height: 48px;
+}
+
+.weekly-condition-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  min-height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weekly-temp-spread {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+.weekly-temp-max {
+  color: var(--text-main);
+}
+
+.weekly-temp-min {
+  color: var(--text-muted);
+}
+
+/* RESPONSIVE LAYOUT CONSTRAINTS */
 @media (max-width: 992px) {
   .app-container { flex-direction: column; }
   .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-line); }
