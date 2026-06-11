@@ -32,7 +32,7 @@ function setupEventListeners() {
 // --- SECURE DATA RETRIEVAL LOGIC ---
 async function fetchWeatherData(city) {
   if (!city || city.trim() === "") {
-    errorMessage.textContent = "Please provide a structural city parameter search target.";
+    errorMessage.textContent = "Please provide a valid city parameter target.";
     return;
   }
 
@@ -46,12 +46,16 @@ async function fetchWeatherData(city) {
     }
 
     const weatherJSON = await response.json();
+    
+    // Save target hours matrix locally to window context to eliminate memory drift bugs during theme changes
+    window.lastLoadedDataNode = weatherJSON.forecast.forecastday[0].hour;
+    
     populateDashboard(weatherJSON);
-    renderHourlyForecastGraph(weatherJSON.forecast.forecastday[0].hour);
+    renderHourlyForecastGraph(window.lastLoadedDataNode);
 
   } catch (error) {
     console.error("Critical System Catch Engine Event:", error);
-    errorMessage.textContent = "Lookup failed. Verify input string spelling and network states.";
+    errorMessage.textContent = "Lookup failed. Verify city name spelling and network status.";
     clearDashboardMetrics();
   }
 }
@@ -82,7 +86,6 @@ function populateDashboard(data) {
   document.getElementById('humidity-progress').style.width = `${current.humidity}%`;
   
   document.getElementById('uv-val').textContent = current.uv;
-  // Chart calculation metrics base range limit max value: 11
   const uvPercent = Math.min((current.uv / 11) * 100, 100);
   document.getElementById('uv-indicator').style.left = `${uvPercent}%`;
 
@@ -93,24 +96,23 @@ function populateDashboard(data) {
   document.getElementById('cloud-val').textContent = current.cloud;
   document.getElementById('cloud-progress').style.width = `${current.cloud}%`;
 
-  // Dynamically update theme effects configuration if system currently stands in light theme
+  // Dynamically update context backdrop parameters if layout is running light theme presets
   evaluateAmbientWeatherEffects(current.condition.text.toLowerCase());
 }
 
 // --- DYNAMIC CHART GENERATION HOOKS (CHART.JS) ---
 function renderHourlyForecastGraph(hourlyArray) {
+  if (!hourlyArray) return;
+  
   const canvasElement = document.getElementById('hourlyTempChart').getContext('2d');
   
-  // Step intervals parser to read values every 2 hours for presentation scannability
+  // Scannability layout processing: Extract data arrays at 2-hour pacing offsets
   const parsedIntervals = hourlyArray.filter((_, index) => index % 2 === 0);
   
-  const labels = parsedIntervals.map(h => {
-    const timeValue = h.time.split(' ')[1];
-    return timeValue; 
-  });
+  const labels = parsedIntervals.map(h => h.time.split(' ')[1]);
   const datasets = parsedIntervals.map(h => Math.round(h.temp_c));
 
-  // Destroy old instance pointer node tracking to avoid rendering collision loops
+  // Destroy stale pointers to explicitly block frame layer overlay artifacts during canvas mutations
   if (hourlyTempChartInstance) {
     hourlyTempChartInstance.destroy();
   }
@@ -130,7 +132,7 @@ function renderHourlyForecastGraph(hourlyArray) {
         borderColor: contextColorLine,
         backgroundColor: 'transparent',
         borderWidth: 3,
-        tension: 0.4, // Smooth curve parsing calculations
+        tension: 0.4,
         pointBackgroundColor: contextColorLine,
         pointHoverRadius: 6
       }]
@@ -157,17 +159,15 @@ function renderHourlyForecastGraph(hourlyArray) {
 
 // --- ATMOSPHERIC WEATHER THEME PARSER LAYER ---
 function evaluateAmbientWeatherEffects(conditionString) {
-  // Reset existing backdrop conditions tokens
   document.body.classList.remove('sunny', 'cloudy', 'snowy');
   
-  if (!document.body.classList.contains('light-mode')) return; // Target structural effects only active during daytime palettes
+  if (!document.body.classList.contains('light-mode')) return;
 
   if (conditionString.includes('sunny') || conditionString.includes('clear')) {
     document.body.classList.add('sunny');
   } else if (conditionString.includes('snow') || conditionString.includes('sleet') || conditionString.includes('blizzard')) {
     document.body.classList.add('snowy');
   } else {
-    // Treat other instances (Mist, Cloud, Overcast, Rain, Drizzle) under ambient cloud coverage layouts
     document.body.classList.add('cloudy');
   }
 }
@@ -182,7 +182,6 @@ function toggleSystemTheme() {
     body.classList.add('light-mode');
     iconNode.className = "fa-solid fa-moon";
     
-    // Retrigger state checks to update backdrops instantly
     const currentConditionText = document.getElementById('weather-condition').textContent.toLowerCase();
     evaluateAmbientWeatherEffects(currentConditionText);
   } else {
@@ -191,12 +190,9 @@ function toggleSystemTheme() {
     iconNode.className = "fa-solid fa-sun";
   }
 
-  // Redraw the chart data streams to visually calibrate grid system colors to new theme values
-  if (hourlyTempChartInstance && window.lastLoadedDataNode) {
+  // Instantly re-render graph theme colors using local window cache node strings to bypass remote calls
+  if (window.lastLoadedDataNode) {
     renderHourlyForecastGraph(window.lastLoadedDataNode);
-  } else {
-    // Fallback refresh search using current visible data targets
-    fetchWeatherData(document.getElementById('location-text').textContent.split(',')[0]);
   }
 }
 
