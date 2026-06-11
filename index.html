@@ -1,160 +1,180 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Skye — Weather</title>
+  <title>Skye — Weather Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-mode">
+
+  <div id="stars-container" class="stars-overlay"></div>
+  <div id="weather-effects-container" class="weather-effects-overlay"></div>
+
   <div class="app-container">
-    <!-- SIDEBAR -->
+    
     <aside class="sidebar">
       <div class="sidebar-header">
-        <div class="logo-wrapper">
-          <span class="logo-icon">✨</span>
-          <h1 class="logo">Skye</h1>
+        <div class="logo">
+          <i class="fa-solid fa-cloud-moon branding-icon"></i>
+          <span>Skye</span>
         </div>
-        <button id="theme-toggle" class="theme-switch-btn" aria-label="Toggle Theme">☀️</button>
+        <button id="theme-toggle" class="theme-toggle-btn" title="Toggle System Theme">
+          <i class="fa-solid fa-sun"></i>
+        </button>
       </div>
-      
+
       <div class="search-wrapper">
-        <input
-          type="text"
-          id="search-input"
-          value="Lucknow"
-          placeholder="Search city..."
-          autocomplete="off"
-        >
-        <button id="search-btn" class="search-icon">🔍</button>
+        <input type="text" id="search-input" placeholder="Search city..." value="Lucknow">
+        <button id="search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
       </div>
 
-      <p id="status-message" class="status-message"></p>
+      <div id="error-message" class="error-box"></div>
 
-      <div id="sidebar-weather-card" class="weather-card">
-        <div class="main-temp-wrapper">
+      <div class="main-weather-display">
+        <h1 id="current-temp">--°C</h1>
+        <div class="condition-meta">
+          <img id="weather-icon" src="" alt="Condition Status" class="weather-status-img">
+          <div id="weather-condition" class="condition-text">Loading...</div>
+          <div id="feels-like" class="sub-condition-text">Feels like --°C</div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="location-timestamp-box">
+        <div class="geo-node">
+          <i class="fa-solid fa-location-dot"></i>
+          <span id="location-text">--, --</span>
+        </div>
+        <div id="local-time" class="time-stamp">--</div>
+      </div>
+
+      <div class="astronomical-widget">
+        <div class="astro-row">
+          <i class="fa-solid fa-sun astro-sun-icon"></i>
           <div>
-            <span id="current-temp" class="temp-display">--</span>
-            <span class="unit-toggle">°C</span>
+            <p class="astro-label">Sunrise</p>
+            <p id="sunrise-time" class="astro-value">--:-- --</p>
           </div>
-          <div id="weather-icon-display" class="condition-icon">☁️</div>
         </div>
-
-        <p id="weather-condition" class="condition-text">Search a city to begin</p>
-        <p class="feels-like">Feels like <span id="feels-like-temp">--°C</span></p>
-        
-        <hr class="divider">
-        
-        <div class="location-details">
-          <p id="location-text" class="location-name">📍 --, --</p>
-          <p id="local-time-text" class="date-string">--</p>
-        </div>
-
-        <div class="sun-phases">
-          <div class="sun-item">
-            <span class="sun-label">☀️ Sunrise</span>
-            <span id="sunrise-time" class="sun-value">--:--</span>
-          </div>
-          <div class="sun-item">
-            <span class="sun-label">🌙 Sunset</span>
-            <span id="sunset-time" class="sun-value">--:--</span>
+        <div class="astro-row">
+          <i class="fa-solid fa-moon astro-moon-icon"></i>
+          <div>
+            <p class="astro-label">Sunset</p>
+            <p id="sunset-time" class="astro-value">--:-- --</p>
           </div>
         </div>
       </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="main-content">
-      <header class="dashboard-header">
-        <div class="tab-container">
-          <button id="tab-today" class="tab-btn active" type="button">Today</button>
-          <button id="tab-week" class="tab-btn" type="button">This week</button>
+      <header class="content-header">
+        <nav class="view-tabs">
+          <button class="tab-btn active">Today</button>
+          <button class="tab-btn">This Week</button>
+        </nav>
+        <div class="live-pulse">
+          <span class="pulse-dot"></span> Live Data Engine
         </div>
       </header>
 
-      <!-- TODAY PANEL -->
-      <section id="today-forecast-panel" class="forecast-view-panel">
+      <section class="highlights-section">
         <h3 class="section-title">Today's Highlights</h3>
-        
         <div class="highlights-grid">
-          <div class="metrics-card">
+          
+          <div class="metric-card">
             <div class="card-header">
-              <span>WIND STATUS</span>
-              <span class="icon">💨</span>
+              <span>Wind Status</span>
+              <i class="fa-solid fa-wind metric-icon"></i>
             </div>
-            <div class="metric-value">
-              <span id="wind-speed">--</span>
-              <span class="unit">km/h</span>
+            <div class="metric-value-container">
+              <span id="wind-speed" class="metric-number">--</span>
+              <span class="metric-unit">km/h</span>
             </div>
+            <div id="wind-direction" class="metric-footer-text">--</div>
           </div>
 
-          <div class="metrics-card">
+          <div class="metric-card">
             <div class="card-header">
-              <span>HUMIDITY</span>
-              <span class="icon">💧</span>
+              <span>Humidity</span>
+              <i class="fa-solid fa-droplet metric-icon"></i>
             </div>
-            <div class="metric-value">
-              <span id="humidity-value">--</span>
-              <span class="unit">%</span>
+            <div class="metric-value-container">
+              <span id="humidity-val" class="metric-number">--</span>
+              <span class="metric-unit">%</span>
             </div>
             <div class="progress-bar-container">
-              <div id="humidity-bar" class="progress-fill" style="width: 0%;"></div>
+              <div id="humidity-progress" class="progress-fill" style="width: 0%"></div>
             </div>
           </div>
 
-          <div class="metrics-card">
+          <div class="metric-card">
             <div class="card-header">
-              <span>UV INDEX</span>
-              <span class="icon">☀️</span>
+              <span>UV Index</span>
+              <i class="fa-solid fa-sun-plant-wilt metric-icon"></i>
             </div>
-            <div class="metric-value">
-              <span id="uv-index">--</span>
+            <div class="metric-value-container">
+              <span id="uv-val" class="metric-number">--</span>
+            </div>
+            <div class="uv-spectrum-bar">
+              <div id="uv-indicator" class="uv-indicator-dot" style="left: 0%"></div>
             </div>
           </div>
 
-          <div class="metrics-card">
+          <div class="metric-card">
             <div class="card-header">
-              <span>PRESSURE</span>
-              <span class="icon">⏲️</span>
+              <span>Pressure</span>
+              <i class="fa-solid fa-gauge-high metric-icon"></i>
             </div>
-            <div class="metric-value">
-              <span id="pressure-value">--</span>
-              <span class="unit">hPa</span>
+            <div class="metric-value-container">
+              <span id="pressure-val" class="metric-number">--</span>
+              <span class="metric-unit">hPa</span>
+            </div>
+            <div id="pressure-status" class="metric-footer-text">Normal</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="card-header">
+              <span>Visibility</span>
+              <i class="fa-solid fa-eye metric-icon"></i>
+            </div>
+            <div class="metric-value-container">
+              <span id="visibility-val" class="metric-number">--</span>
+              <span class="metric-unit">km</span>
+            </div>
+            <div id="visibility-status" class="metric-footer-text">--</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="card-header">
+              <span>Cloud Cover</span>
+              <i class="fa-solid fa-cloud metric-icon"></i>
+            </div>
+            <div class="metric-value-container">
+              <span id="cloud-val" class="metric-number">--</span>
+              <span class="metric-unit">%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div id="cloud-progress" class="progress-fill" style="width: 0%"></div>
             </div>
           </div>
 
-          <div class="metrics-card">
-            <div class="card-header">
-              <span>VISIBILITY</span>
-              <span class="icon">👁️</span>
-            </div>
-            <div class="metric-value">
-              <span id="visibility-value">--</span>
-              <span class="unit">km</span>
-            </div>
-          </div>
-
-          <div class="metrics-card">
-            <div class="card-header">
-              <span>CLOUD COVER</span>
-              <span class="icon">☁️</span>
-            </div>
-            <div class="metric-value">
-              <span id="cloud-value">--</span>
-              <span class="unit">%</span>
-            </div>
-          </div>
         </div>
-
-        <h3 class="section-title margin-top-lg">Hourly Forecast</h3>
-        <div class="horizontal-scroll-container" id="hourly-cards-container"></div>
       </section>
 
-      <!-- WEEK PANEL -->
-      <section id="weekly-forecast-panel" class="forecast-view-panel hidden">
-        <h3 class="section-title">This Week's Forecast</h3>
-        <div class="weekly-list-container" id="weekly-cards-container"></div>
+      <section class="forecast-graph-section">
+        <h3 class="section-title">Hourly Temperature Forecast Curve</h3>
+        <div class="chart-container-wrapper">
+          <canvas id="hourlyTempChart"></canvas>
+        </div>
       </section>
+
     </main>
   </div>
 
