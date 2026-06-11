@@ -8,6 +8,13 @@ const searchBtn = document.getElementById('search-btn');
 const themeToggle = document.getElementById('theme-toggle');
 const errorMessage = document.getElementById('error-message');
 
+// Navigation Tabs Core Elements
+const tabToday = document.getElementById('tab-today');
+const tabWeek = document.getElementById('tab-week');
+const hourlyViewSection = document.getElementById('hourly-view-section');
+const weeklyViewSection = document.getElementById('weekly-view-section');
+const weeklyForecastContainer = document.getElementById('weekly-forecast-container');
+
 // Global Chart Pointer Instance Management
 let hourlyTempChartInstance = null;
 
@@ -18,15 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
-  searchBtn.addEventListener('click', () => {
-    fetchWeatherData(searchInput.value);
-  });
+  searchBtn.addEventListener('click', () => fetchWeatherData(searchInput.value));
 
   searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') fetchWeatherData(searchInput.value);
   });
 
   themeToggle.addEventListener('click', toggleSystemTheme);
+
+  // Tab Switching Controller Logic Routing
+  tabToday.addEventListener('click', () => switchForecastLayoutView('today'));
+  tabWeek.addEventListener('click', () => switchForecastLayoutView('week'));
 }
 
 // --- SECURE DATA RETRIEVAL LOGIC ---
@@ -47,11 +56,13 @@ async function fetchWeatherData(city) {
 
     const weatherJSON = await response.json();
     
-    // Save target hours matrix locally to window context to eliminate memory drift bugs during theme changes
-    window.lastLoadedDataNode = weatherJSON.forecast.forecastday[0].hour;
+    // Cache deep arrays to window object reference frame context to stop theme-toggle layout recalculation memory bugs
+    window.cachedHourlyNode = weatherJSON.forecast.forecastday[0].hour;
+    window.cachedWeeklyNode = weatherJSON.forecast.forecastday;
     
-    populateDashboard(weatherJSON);
-    renderHourlyForecastGraph(window.lastLoadedDataNode);
+    populateDashboardMetrics(weatherJSON);
+    renderHourlyForecastGraph(window.cachedHourlyNode);
+    populateWeeklyForecastGrid(window.cachedWeeklyNode);
 
   } catch (error) {
     console.error("Critical System Catch Engine Event:", error);
@@ -61,12 +72,12 @@ async function fetchWeatherData(city) {
 }
 
 // --- INTERFACE POPULATION HOOKS ---
-function populateDashboard(data) {
+function populateDashboardMetrics(data) {
   const current = data.current;
   const location = data.location;
   const astro = data.forecast.forecastday[0].astro;
 
-  // Primary Info Panel
+  // Primary Sidebar Info Panel
   document.getElementById('current-temp').textContent = `${Math.round(current.temp_c)}°C`;
   document.getElementById('weather-condition').textContent = current.condition.text;
   document.getElementById('feels-like').textContent = `Feels like ${Math.round(current.feelslike_c)}°C`;
@@ -74,11 +85,11 @@ function populateDashboard(data) {
   document.getElementById('location-text').textContent = `${location.name}, ${location.country}`;
   document.getElementById('local-time').textContent = location.localtime;
 
-  // Astronomy Metrics
+  // Astronomy Widgets
   document.getElementById('sunrise-time').textContent = astro.sunrise;
   document.getElementById('sunset-time').textContent = astro.sunset;
 
-  // Highlight Elements Calculations
+  // Highlight Cards
   document.getElementById('wind-speed').textContent = current.wind_kph;
   document.getElementById('wind-direction').textContent = `Heading direction angle: ${current.wind_dir}`;
   
@@ -96,31 +107,73 @@ function populateDashboard(data) {
   document.getElementById('cloud-val').textContent = current.cloud;
   document.getElementById('cloud-progress').style.width = `${current.cloud}%`;
 
-  // Dynamically update context backdrop parameters if layout is running light theme presets
   evaluateAmbientWeatherEffects(current.condition.text.toLowerCase());
 }
 
-// --- DYNAMIC CHART GENERATION HOOKS (CHART.JS) ---
+// --- VIEW CONTROLLER MANAGER SWITCH ---
+function switchForecastLayoutView(targetView) {
+  if (targetView === 'today') {
+    tabToday.classList.add('active');
+    tabWeek.classList.remove('active');
+    hourlyViewSection.classList.remove('display-hidden');
+    weeklyViewSection.classList.add('display-hidden');
+  } else if (targetView === 'week') {
+    tabWeek.classList.add('active');
+    tabToday.classList.remove('active');
+    weeklyViewSection.classList.remove('display-hidden');
+    hourlyViewSection.classList.add('display-hidden');
+  }
+}
+
+// --- EXTENDED WEATHER TIMELINE GENERATOR ---
+function populateWeeklyForecastGrid(forecastDaysArray) {
+  if (!forecastDaysArray || !weeklyForecastContainer) return;
+
+  weeklyForecastContainer.innerHTML = ""; // Wipe past iteration nodes safely
+
+  forecastDaysArray.forEach(dayNode => {
+    const epochDate = new Date(dayNode.date);
+    
+    // Parse structural styling tokens out of standard ISO structures
+    const weekdayString = epochDate.toLocaleDateString('en-US', { weekday: 'long' });
+    const shortDateString = epochDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    const cardHTML = `
+      <div class="weekly-forecast-card">
+        <p class="weekly-day-title">${weekdayString}</p>
+        <p class="weekly-card-date">${shortDateString}</p>
+        <div class="weekly-icon-wrapper">
+          <img src="https:${dayNode.day.condition.icon}" alt="${dayNode.day.condition.text}">
+        </div>
+        <p class="weekly-condition-label">${dayNode.day.condition.text}</p>
+        <div class="weekly-temp-spread">
+          <span class="weekly-temp-max">${Math.round(dayNode.day.maxtemp_c)}°</span>
+          <span class="weekly-temp-min">${Math.round(dayNode.day.mintemp_c)}°</span>
+        </div>
+      </div>
+    `;
+    weeklyForecastContainer.insertAdjacentHTML('beforeend', cardHTML);
+  });
+}
+
+// --- GRAPH GENERATION CODES (CHART.JS) ---
 function renderHourlyForecastGraph(hourlyArray) {
   if (!hourlyArray) return;
   
   const canvasElement = document.getElementById('hourlyTempChart').getContext('2d');
-  
-  // Scannability layout processing: Extract data arrays at 2-hour pacing offsets
   const parsedIntervals = hourlyArray.filter((_, index) => index % 2 === 0);
   
   const labels = parsedIntervals.map(h => h.time.split(' ')[1]);
   const datasets = parsedIntervals.map(h => Math.round(h.temp_c));
 
-  // Destroy stale pointers to explicitly block frame layer overlay artifacts during canvas mutations
   if (hourlyTempChartInstance) {
     hourlyTempChartInstance.destroy();
   }
 
   const isDarkModeActive = document.body.classList.contains('dark-mode');
   const contextColorLine = isDarkModeActive ? '#3f8cff' : '#0284c7';
-  const contextColorText = isDarkModeActive ? '#7f8f9f' : '#64748b';
-  const contextGridColor = isDarkModeActive ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+  const contextColorText = isDarkModeActive ? '#78889b' : '#64748b';
+  const contextGridColor = isDarkModeActive ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
 
   hourlyTempChartInstance = new Chart(canvasElement, {
     type: 'line',
@@ -140,9 +193,7 @@ function renderHourlyForecastGraph(hourlyArray) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
+      plugins: { legend: { display: false } },
       scales: {
         x: {
           grid: { color: contextGridColor },
@@ -159,14 +210,11 @@ function renderHourlyForecastGraph(hourlyArray) {
 
 // --- ATMOSPHERIC WEATHER THEME PARSER LAYER ---
 function evaluateAmbientWeatherEffects(conditionString) {
-  document.body.classList.remove('sunny', 'cloudy', 'snowy');
-  
+  document.body.classList.remove('sunny', 'cloudy');
   if (!document.body.classList.contains('light-mode')) return;
 
   if (conditionString.includes('sunny') || conditionString.includes('clear')) {
     document.body.classList.add('sunny');
-  } else if (conditionString.includes('snow') || conditionString.includes('sleet') || conditionString.includes('blizzard')) {
-    document.body.classList.add('snowy');
   } else {
     document.body.classList.add('cloudy');
   }
@@ -185,14 +233,14 @@ function toggleSystemTheme() {
     const currentConditionText = document.getElementById('weather-condition').textContent.toLowerCase();
     evaluateAmbientWeatherEffects(currentConditionText);
   } else {
-    body.classList.remove('light-mode', 'sunny', 'cloudy', 'snowy');
+    body.classList.remove('light-mode', 'sunny', 'cloudy');
     body.classList.add('dark-mode');
     iconNode.className = "fa-solid fa-sun";
   }
 
-  // Instantly re-render graph theme colors using local window cache node strings to bypass remote calls
-  if (window.lastLoadedDataNode) {
-    renderHourlyForecastGraph(window.lastLoadedDataNode);
+  // Hot swap canvas instance attributes without creating unnecessary API execution requests
+  if (window.cachedHourlyNode) {
+    renderHourlyForecastGraph(window.cachedHourlyNode);
   }
 }
 
@@ -200,4 +248,5 @@ function clearDashboardMetrics() {
   document.getElementById('current-temp').textContent = "--°C";
   document.getElementById('weather-condition').textContent = "Failed";
   if (hourlyTempChartInstance) hourlyTempChartInstance.destroy();
+  if (weeklyForecastContainer) weeklyForecastContainer.innerHTML = "";
 }
