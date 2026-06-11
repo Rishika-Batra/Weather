@@ -1,232 +1,207 @@
 // --- LIVE ROUTE ACCESS CREDS ---
 const API_KEY = "f400d12c089a4750817180949250304";
 const BASE_URL = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&days=7&q=`;
-// --- DOM ELEMENTS ---
-const searchInput = document.getElementById("search-input");
-const searchBtn = document.getElementById("search-btn");
-const tabToday = document.getElementById("tab-today");
-const tabWeek = document.getElementById("tab-week");
-const todayPanel = document.getElementById("today-forecast-panel");
-const weeklyPanel = document.getElementById("weekly-forecast-panel");
-const themeToggle = document.getElementById("theme-toggle");
-const sidebarCard = document.getElementById("sidebar-weather-card");
-const statusMessage = document.getElementById("status-message");
 
-// Primary data nodes
-const currentTemp = document.getElementById("current-temp");
-const weatherCondition = document.getElementById("weather-condition");
-const weatherIconDisplay = document.getElementById("weather-icon-display");
-const feelsLikeTemp = document.getElementById("feels-like-temp");
-const locationText = document.getElementById("location-text");
-const localTimeText = document.getElementById("local-time-text");
-const sunriseTime = document.getElementById("sunrise-time");
-const sunsetTime = document.getElementById("sunset-time");
+// --- DOM REGISTRATION ELEMENTS ---
+const searchInput = document.getElementById('search-input');
+const searchBtn = document.getElementById('search-btn');
+const themeToggle = document.getElementById('theme-toggle');
+const errorMessage = document.getElementById('error-message');
 
-const windSpeed = document.getElementById("wind-speed");
-const humidityValue = document.getElementById("humidity-value");
-const humidityBar = document.getElementById("humidity-bar");
-const uvIndex = document.getElementById("uv-index");
-const pressureValue = document.getElementById("pressure-value");
-const visibilityValue = document.getElementById("visibility-value");
-const cloudValue = document.getElementById("cloud-value");
+// Global Chart Pointer Instance Management
+let hourlyTempChartInstance = null;
 
-const hourlyCardsContainer = document.getElementById("hourly-cards-container");
-const weeklyCardsContainer = document.getElementById("weekly-cards-container");
+// --- INITIALIZER ROUTINE ENGINE ---
+document.addEventListener('DOMContentLoaded', () => {
+  fetchWeatherData("Lucknow");
+  setupEventListeners();
+});
 
-// --- 1. DATA FETCHER ---
+function setupEventListeners() {
+  searchBtn.addEventListener('click', () => {
+    fetchWeatherData(searchInput.value);
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') fetchWeatherData(searchInput.value);
+  });
+
+  themeToggle.addEventListener('click', toggleSystemTheme);
+}
+
+// --- SECURE DATA RETRIEVAL LOGIC ---
 async function fetchWeatherData(city) {
-  const trimmedCity = city.trim();
-  if (!trimmedCity) {
-    setStatus("Type a city name and press Enter or click search.");
+  if (!city || city.trim() === "") {
+    errorMessage.textContent = "Please provide a structural city parameter search target.";
     return;
   }
 
-  setStatus(`Loading weather for "${trimmedCity}"...`);
-  toggleLoading(true);
-
   try {
-    const response = await fetch(`${BASE_URL}${encodeURIComponent(trimmedCity)}`);
+    errorMessage.textContent = "";
+    const secureUrl = `${BASE_URL}${encodeURIComponent(city.trim())}`;
+    
+    const response = await fetch(secureUrl);
     if (!response.ok) {
-      throw new Error("Endpoint error");
+      throw new Error(`Execution error. Status code returned: ${response.status}`);
     }
 
-    const data = await response.json();
-    populateDashboard(data);
-    setStatus(`Showing latest data for ${data.location.name}, ${data.location.country}`);
+    const weatherJSON = await response.json();
+    populateDashboard(weatherJSON);
+    renderHourlyForecastGraph(weatherJSON.forecast.forecastday[0].hour);
+
   } catch (error) {
-    console.error("Critical API Fault:", error);
-    setStatus("Lookup failed. Please check the city name or try again later.");
-  } finally {
-    toggleLoading(false);
+    console.error("Critical System Catch Engine Event:", error);
+    errorMessage.textContent = "Lookup failed. Verify input string spelling and network states.";
+    clearDashboardMetrics();
   }
 }
 
-// --- 2. POPULATE UI ---
+// --- INTERFACE POPULATION HOOKS ---
 function populateDashboard(data) {
-  currentTemp.textContent = Math.round(data.current.temp_c);
-  weatherCondition.textContent = data.current.condition.text;
-  weatherIconDisplay.innerHTML = `<img src="https:${data.current.condition.icon}" alt="condition thumbnail" width="64">`;
-  feelsLikeTemp.textContent = `${Math.round(data.current.feelslike_c)}°C`;
-  locationText.textContent = `📍 ${data.location.name}, ${data.location.country}`;
-  localTimeText.textContent = data.location.localtime;
-
+  const current = data.current;
+  const location = data.location;
   const astro = data.forecast.forecastday[0].astro;
-  sunriseTime.textContent = astro.sunrise;
-  sunsetTime.textContent = astro.sunset;
 
-  windSpeed.textContent = data.current.wind_kph;
-  humidityValue.textContent = data.current.humidity;
-  humidityBar.style.width = `${data.current.humidity}%`;
-  uvIndex.textContent = data.current.uv;
-  pressureValue.textContent = data.current.pressure_mb;
-  visibilityValue.textContent = data.current.vis_km;
-  cloudValue.textContent = data.current.cloud;
+  // Primary Info Panel
+  document.getElementById('current-temp').textContent = `${Math.round(current.temp_c)}°C`;
+  document.getElementById('weather-condition').textContent = current.condition.text;
+  document.getElementById('feels-like').textContent = `Feels like ${Math.round(current.feelslike_c)}°C`;
+  document.getElementById('weather-icon').src = `https:${current.condition.icon}`;
+  document.getElementById('location-text').textContent = `${location.name}, ${location.country}`;
+  document.getElementById('local-time').textContent = location.localtime;
 
-  // Hourly
-  hourlyCardsContainer.innerHTML = "";
-  const currentHoursArray = data.forecast.forecastday[0].hour;
-  currentHoursArray.forEach((item) => {
-    const timeOnly = item.time.split(" ")[1];
-    const card = document.createElement("div");
-    card.className = "hour-card";
-    card.innerHTML = `
-      <div style="font-size: 13px; color: var(--text-muted);">${timeOnly}</div>
-      <div><img src="https:${item.condition.icon}" width="36" alt=""></div>
-      <div style="font-weight: 600; font-size: 16px;">${Math.round(item.temp_c)}°</div>
-      <div style="font-size: 11px; color: var(--accent-color); font-weight: bold;">💧${item.chance_of_rain}%</div>
-    `;
-    hourlyCardsContainer.appendChild(card);
+  // Astronomy Metrics
+  document.getElementById('sunrise-time').textContent = astro.sunrise;
+  document.getElementById('sunset-time').textContent = astro.sunset;
+
+  // Highlight Elements Calculations
+  document.getElementById('wind-speed').textContent = current.wind_kph;
+  document.getElementById('wind-direction').textContent = `Heading direction angle: ${current.wind_dir}`;
+  
+  document.getElementById('humidity-val').textContent = current.humidity;
+  document.getElementById('humidity-progress').style.width = `${current.humidity}%`;
+  
+  document.getElementById('uv-val').textContent = current.uv;
+  // Chart calculation metrics base range limit max value: 11
+  const uvPercent = Math.min((current.uv / 11) * 100, 100);
+  document.getElementById('uv-indicator').style.left = `${uvPercent}%`;
+
+  document.getElementById('pressure-val').textContent = current.pressure_mb;
+  document.getElementById('visibility-val').textContent = current.vis_km;
+  document.getElementById('visibility-status').textContent = current.vis_km >= 10 ? 'Excellent visibility range' : 'Reduced clear spatial visibility';
+  
+  document.getElementById('cloud-val').textContent = current.cloud;
+  document.getElementById('cloud-progress').style.width = `${current.cloud}%`;
+
+  // Dynamically update theme effects configuration if system currently stands in light theme
+  evaluateAmbientWeatherEffects(current.condition.text.toLowerCase());
+}
+
+// --- DYNAMIC CHART GENERATION HOOKS (CHART.JS) ---
+function renderHourlyForecastGraph(hourlyArray) {
+  const canvasElement = document.getElementById('hourlyTempChart').getContext('2d');
+  
+  // Step intervals parser to read values every 2 hours for presentation scannability
+  const parsedIntervals = hourlyArray.filter((_, index) => index % 2 === 0);
+  
+  const labels = parsedIntervals.map(h => {
+    const timeValue = h.time.split(' ')[1];
+    return timeValue; 
   });
+  const datasets = parsedIntervals.map(h => Math.round(h.temp_c));
 
-  // Weekly
-  weeklyCardsContainer.innerHTML = "";
-  const daysArray = data.forecast.forecastday;
-  daysArray.forEach((dayItem) => {
-    const parsedDate = new Date(dayItem.date);
-    const dayOptions = { weekday: "long", day: "numeric", month: "short" };
-    const formattedDay = parsedDate.toLocaleDateString("en-US", dayOptions);
-
-    const row = document.createElement("div");
-    row.className = "week-row-card";
-    row.innerHTML = `
-      <div style="font-weight: 600; min-width: 180px;">${formattedDay}</div>
-      <div style="display: flex; align-items: center; gap: 12px; color: var(--text-muted); flex: 1;">
-        <img src="https:${dayItem.day.condition.icon}" width="40" alt="">
-        <span style="font-weight: 500;">${dayItem.day.condition.text}</span>
-      </div>
-      <div style="font-weight: 600; font-size: 15px;">
-        <span>${Math.round(dayItem.day.maxtemp_c)}°C</span>
-        <span style="color: var(--text-muted); font-weight: 400; margin-left: 8px;">${Math.round(dayItem.day.mintemp_c)}°C</span>
-      </div>
-    `;
-    weeklyCardsContainer.appendChild(row);
-  });
-
-  // Day/night sidebar gradient
-  const localHourStr = data.location.localtime.split(" ")[1];
-  evalDayNightBackground(localHourStr, astro.sunrise, astro.sunset);
-}
-
-// --- 3. THEME SWITCH ---
-function applyTheme(theme) {
-  const htmlElement = document.documentElement;
-  htmlElement.classList.remove("light", "dark");
-  htmlElement.classList.add(theme);
-  themeToggle.textContent = theme === "dark" ? "☀️" : "🌙";
-}
-
-themeToggle.addEventListener("click", () => {
-  const htmlElement = document.documentElement;
-  const nextTheme = htmlElement.classList.contains("light") ? "dark" : "light";
-  applyTheme(nextTheme);
-  localStorage.setItem("skye-theme", nextTheme);
-});
-
-// --- 4. DAY/NIGHT BACKGROUND ---
-function evalDayNightBackground(currentTimeStr, sunriseStr, sunsetStr) {
-  const parseToMinutes = (timeStr) => {
-    if (!timeStr) return 0;
-    const upper = timeStr.toUpperCase();
-    const hasPM = upper.includes("PM");
-    const hasAM = upper.includes("AM");
-
-    const numericTokens = upper.replace(/AM|PM/g, "").trim();
-    let [hours, minutes] = numericTokens.split(":").map(Number);
-
-    if (hasPM && hours < 12) hours += 12;
-    if (hasAM && hours === 12) hours = 0;
-
-    return hours * 60 + minutes;
-  };
-
-  const current = parseToMinutes(currentTimeStr);
-  const sunrise = parseToMinutes(sunriseStr);
-  const sunset = parseToMinutes(sunsetStr);
-
-  if (current >= sunrise && current < sunset) {
-    sidebarCard.classList.add("day-bg");
-    sidebarCard.classList.remove("night-bg");
-  } else {
-    sidebarCard.classList.add("night-bg");
-    sidebarCard.classList.remove("day-bg");
+  // Destroy old instance pointer node tracking to avoid rendering collision loops
+  if (hourlyTempChartInstance) {
+    hourlyTempChartInstance.destroy();
   }
-}
 
-// --- 5. TABS (TODAY / WEEK) ---
-function switchView(targetMode) {
-  if (targetMode === "today") {
-    tabToday.classList.add("active");
-    tabWeek.classList.remove("active");
-    todayPanel.classList.remove("hidden");
-    weeklyPanel.classList.add("hidden");
-  } else {
-    tabWeek.classList.add("active");
-    tabToday.classList.remove("active");
-    weeklyPanel.classList.remove("hidden");
-    todayPanel.classList.add("hidden");
-  }
-}
+  const isDarkModeActive = document.body.classList.contains('dark-mode');
+  const contextColorLine = isDarkModeActive ? '#3f8cff' : '#0284c7';
+  const contextColorText = isDarkModeActive ? '#7f8f9f' : '#64748b';
+  const contextGridColor = isDarkModeActive ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
 
-tabToday.addEventListener("click", () => switchView("today"));
-tabWeek.addEventListener("click", () => switchView("week"));
-
-// --- 6. SEARCH HANDLERS ---
-searchBtn.addEventListener("click", () => fetchWeatherData(searchInput.value));
-
-searchInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    if (!searchInput.value.trim()) {
-      setStatus("Example: London, New York, Tokyo...");
-      return;
+  hourlyTempChartInstance = new Chart(canvasElement, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Temperature (°C)',
+        data: datasets,
+        borderColor: contextColorLine,
+        backgroundColor: 'transparent',
+        borderWidth: 3,
+        tension: 0.4, // Smooth curve parsing calculations
+        pointBackgroundColor: contextColorLine,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          grid: { color: contextGridColor },
+          ticks: { color: contextColorText, font: { family: 'Plus Jakarta Sans', weight: 500 } }
+        },
+        y: {
+          grid: { color: contextGridColor },
+          ticks: { color: contextColorText, font: { family: 'Plus Jakarta Sans' } }
+        }
+      }
     }
-    fetchWeatherData(searchInput.value);
-  }
-});
-
-// --- UTILITIES ---
-function setStatus(message) {
-  statusMessage.textContent = message;
+  });
 }
 
-function toggleLoading(isLoading) {
-  if (isLoading) {
-    searchBtn.textContent = "⏳";
-    searchBtn.disabled = true;
+// --- ATMOSPHERIC WEATHER THEME PARSER LAYER ---
+function evaluateAmbientWeatherEffects(conditionString) {
+  // Reset existing backdrop conditions tokens
+  document.body.classList.remove('sunny', 'cloudy', 'snowy');
+  
+  if (!document.body.classList.contains('light-mode')) return; // Target structural effects only active during daytime palettes
+
+  if (conditionString.includes('sunny') || conditionString.includes('clear')) {
+    document.body.classList.add('sunny');
+  } else if (conditionString.includes('snow') || conditionString.includes('sleet') || conditionString.includes('blizzard')) {
+    document.body.classList.add('snowy');
   } else {
-    searchBtn.textContent = "🔍";
-    searchBtn.disabled = false;
+    // Treat other instances (Mist, Cloud, Overcast, Rain, Drizzle) under ambient cloud coverage layouts
+    document.body.classList.add('cloudy');
   }
 }
 
-// --- ENTRY ---
-document.addEventListener("DOMContentLoaded", () => {
-  const storedTheme = localStorage.getItem("skye-theme") || "dark";
-  applyTheme(storedTheme);
+// --- VISUAL INTERFACE THEME ALTERNATION ---
+function toggleSystemTheme() {
+  const body = document.body;
+  const iconNode = themeToggle.querySelector('i');
 
-  // initial fetch using default value in the input
-  if (searchInput.value.trim()) {
-    fetchWeatherData(searchInput.value);
+  if (body.classList.contains('dark-mode')) {
+    body.classList.remove('dark-mode');
+    body.classList.add('light-mode');
+    iconNode.className = "fa-solid fa-moon";
+    
+    // Retrigger state checks to update backdrops instantly
+    const currentConditionText = document.getElementById('weather-condition').textContent.toLowerCase();
+    evaluateAmbientWeatherEffects(currentConditionText);
   } else {
-    setStatus("Search for any city to see the forecast.");
+    body.classList.remove('light-mode', 'sunny', 'cloudy', 'snowy');
+    body.classList.add('dark-mode');
+    iconNode.className = "fa-solid fa-sun";
   }
-});
+
+  // Redraw the chart data streams to visually calibrate grid system colors to new theme values
+  if (hourlyTempChartInstance && window.lastLoadedDataNode) {
+    renderHourlyForecastGraph(window.lastLoadedDataNode);
+  } else {
+    // Fallback refresh search using current visible data targets
+    fetchWeatherData(document.getElementById('location-text').textContent.split(',')[0]);
+  }
+}
+
+function clearDashboardMetrics() {
+  document.getElementById('current-temp').textContent = "--°C";
+  document.getElementById('weather-condition').textContent = "Failed";
+  if (hourlyTempChartInstance) hourlyTempChartInstance.destroy();
+}
